@@ -70,6 +70,11 @@ class SQLHub(RDBSHub):
                    'get_set_json',
                    'get_callback']
 
+    def commit(self):
+        ##Expose commit for manual transaction committing##
+        SQLHub.connection[host_type]['con_obj'].commit()
+
+
     def get_databases(self):
         """
         Return a set of databases available for the datasource. The
@@ -296,8 +301,12 @@ class SQLHub(RDBSHub):
         else:
             self.__cursor_execute(sql, kwargs, cursor)
 
-        ##Commit transaction##
-        SQLHub.connection[host_type]['con_obj'].commit()
+        """
+        If the flag nocommit is set, postpone commit.
+        Otherwise, automatically commit after a transaction.
+        """
+        if !('nocommit' in kwargs) or !(kwargs['nocommit']):
+            SQLHub.connection[host_type]['con_obj'].commit()
 
         return self.get_data(cursor, kwargs)
 
