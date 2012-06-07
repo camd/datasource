@@ -79,7 +79,6 @@ class MySQL(SQLHub):
 
             SQLHub.connection[host_type]['cursor'] = SQLHub.connection[host_type]['con_obj'].cursor()
 
-
     def try_to_connect(self, host_type, db):
 
         for i in range(self.max_connect_attempts):

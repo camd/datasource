@@ -71,6 +71,7 @@ class TestMySQLHub(unittest.TestCase):
                  'test_placeholder_quote',
                  'test_big_replace',
                  'test_executemany',
+                 'test_nocommit',
                  'test_drop_table',
                  'test_disconnect']
 
@@ -595,6 +596,33 @@ class TestMySQLHub(unittest.TestCase):
         target_rowcount = 2*TestMySQLHub.test_data_rows
         msg = 'Row count in data file, %i, does not match row count in db %i.' % (target_rowcount, rowcount)
         self.assertEqual(rowcount, target_rowcount, msg=msg)
+
+    def test_nocommit(self):
+
+        dh = MySQL(self.data_source)
+        dh.use_database('test')
+
+
+        rowcount_before = dh.execute( db=self.db,
+                            proc="sql.ds_selects.get_row_count",
+                            replace=['auto_pfamA', self.table_name],
+                            return_type='iter').get_column_data('rowcount')
+
+        ##Load Data##
+        for row in TestMySQLHub.test_data:
+            dh.execute(proc="test.insert_test_data",
+                       nocommit=True,
+                       placeholders=row)
+
+        rowcount_after = dh.execute( db=self.db,
+                            proc="sql.ds_selects.get_row_count",
+                            replace=['auto_pfamA', self.table_name],
+                            return_type='iter').get_column_data('rowcount')
+
+        ##Confirm we loaded all of the rows##
+        msg = 'Data was committed even though nocommit was set.'
+        self.assertEqual(rowcount_before, rowcount_after, msg=msg)
+
 
     def test_drop_table(self):
 
