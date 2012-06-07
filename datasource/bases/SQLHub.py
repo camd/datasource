@@ -305,7 +305,9 @@ class SQLHub(RDBSHub):
         If the flag nocommit is set, postpone commit.
         Otherwise, automatically commit after a transaction.
         """
-        if !('nocommit' in kwargs) or !(kwargs['nocommit']):
+        if ('nocommit' in kwargs) and (kwargs['nocommit']):
+            pass
+        else:
             SQLHub.connection[host_type]['con_obj'].commit()
 
         return self.get_data(cursor, kwargs)
