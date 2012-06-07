@@ -71,8 +71,8 @@ class TestMySQLHub(unittest.TestCase):
                  'test_placeholder_quote',
                  'test_big_replace',
                  'test_executemany',
+                 'test_nocommit',
                  'test_drop_table',
-                 'test_nocommit_until_end',
                  'test_disconnect']
 
         return unittest.TestSuite(map(TestMySQLHub, tests))
@@ -597,6 +597,43 @@ class TestMySQLHub(unittest.TestCase):
         msg = 'Row count in data file, %i, does not match row count in db %i.' % (target_rowcount, rowcount)
         self.assertEqual(rowcount, target_rowcount, msg=msg)
 
+    def test_nocommit(self):
+      ##Test that a query doesn't go through without committing##
+      #dh = MySQL(self.data_source)
+      #dh.execute(db=self.db,
+      #           nocommit=True,
+      #           proc="test.nocommit")
+
+      #check_query = dh.execute(db=self.db,
+      #                         proc="sql.",
+      #                         return_type="set")
+      ##Test that commit happens after the two queries##
+
+        dh = MySQL(self.data_source)
+        dh.use_database('test')
+
+
+        rowcount_before = dh.execute( db=self.db,
+                            proc="sql.ds_selects.get_row_count",
+                            replace=['auto_pfamA', self.table_name],
+                            return_type='iter').get_column_data('rowcount')
+
+        ##Load Data##
+        for row in TestMySQLHub.test_data:
+            dh.execute(proc="test.insert_test_data",
+                       nocommit=True,
+                       placeholders=row)
+
+        rowcount_after = dh.execute( db=self.db,
+                            proc="sql.ds_selects.get_row_count",
+                            replace=['auto_pfamA', self.table_name],
+                            return_type='iter').get_column_data('rowcount')
+
+        ##Confirm we loaded all of the rows##
+        msg = 'Data was committed even though nocommit was set.'
+        self.assertEqual(rowcount_before, rowcount_after, msg=msg)
+
+
     def test_drop_table(self):
 
         dh = MySQL(self.data_source)
@@ -612,19 +649,6 @@ class TestMySQLHub(unittest.TestCase):
         if self.table_name in table_set:
             msg = "The table, %s, was not dropped in %s." % (self.table_name, self.db)
             self.fail(msg)
-
-    def test_nocommit_until_end(self):
-      ##Test that a query doesn't go through without committing##
-      dh = MySQL(self.data_source)
-      dh.execute(db=self.db,
-                 nocommit=True,
-                 proc="test.nocommit_until_end")
-      
-      check_query = dh.execute(db=self.db,
-                               proc="test.",
-                               return_type="set")
-      ##Test that commit happens after the two queries##
-      
 
     def test_disconnect(self):
 
