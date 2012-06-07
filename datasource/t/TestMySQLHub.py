@@ -598,16 +598,6 @@ class TestMySQLHub(unittest.TestCase):
         self.assertEqual(rowcount, target_rowcount, msg=msg)
 
     def test_nocommit(self):
-      ##Test that a query doesn't go through without committing##
-      #dh = MySQL(self.data_source)
-      #dh.execute(db=self.db,
-      #           nocommit=True,
-      #           proc="test.nocommit")
-
-      #check_query = dh.execute(db=self.db,
-      #                         proc="sql.",
-      #                         return_type="set")
-      ##Test that commit happens after the two queries##
 
         dh = MySQL(self.data_source)
         dh.use_database('test')
