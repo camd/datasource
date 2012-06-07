@@ -72,6 +72,7 @@ class TestMySQLHub(unittest.TestCase):
                  'test_big_replace',
                  'test_executemany',
                  'test_drop_table',
+                 'test_nocommit_until_end',
                  'test_disconnect']
 
         return unittest.TestSuite(map(TestMySQLHub, tests))
@@ -611,6 +612,19 @@ class TestMySQLHub(unittest.TestCase):
         if self.table_name in table_set:
             msg = "The table, %s, was not dropped in %s." % (self.table_name, self.db)
             self.fail(msg)
+
+    def test_nocommit_until_end(self):
+      ##Test that a query doesn't go through without committing##
+      dh = MySQL(self.data_source)
+      dh.execute(db=self.db,
+                 nocommit=True,
+                 proc="test.nocommit_until_end")
+      
+      check_query = dh.execute(db=self.db,
+                               proc="test.",
+                               return_type="set")
+      ##Test that commit happens after the two queries##
+      
 
     def test_disconnect(self):
 
