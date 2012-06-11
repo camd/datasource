@@ -77,6 +77,7 @@ class MySQL(SQLHub):
                                                                           passwd=self.conf[host_type].get('passwd', ''),
                                                                           cursorclass = MySQLdb.cursors.DictCursor)
 
+            SQLHub.connection[host_type]['con_obj'].autocommit(False)
             SQLHub.connection[host_type]['cursor'] = SQLHub.connection[host_type]['con_obj'].cursor()
 
     def try_to_connect(self, host_type, db):
