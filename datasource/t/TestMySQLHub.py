@@ -605,8 +605,10 @@ class TestMySQLHub(unittest.TestCase):
 
         rowcount_before = dh.execute( db=self.db,
                             proc="sql.ds_selects.get_row_count",
+                            nocommit=True,
                             replace=['auto_pfamA', self.table_name],
                             return_type='iter').get_column_data('rowcount')
+        print rowcount_before
 
         ##Load Data##
         for row in TestMySQLHub.test_data:
@@ -616,8 +618,11 @@ class TestMySQLHub(unittest.TestCase):
 
         rowcount_after = dh.execute( db=self.db,
                             proc="sql.ds_selects.get_row_count",
+                            nocommit=True,
                             replace=['auto_pfamA', self.table_name],
                             return_type='iter').get_column_data('rowcount')
+
+        print rowcount_after
 
         ##Confirm we loaded all of the rows##
         msg = 'Data was committed even though nocommit was set.'
