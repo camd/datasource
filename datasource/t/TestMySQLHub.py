@@ -602,8 +602,10 @@ class TestMySQLHub(unittest.TestCase):
         dh = MySQL(self.data_source)
         dh.use_database('test')
 
+        dh_read = MySQL(self.data_source)
+        dh_read.use_database('test')
 
-        rowcount_before = dh.execute( db=self.db,
+        rowcount_before = dh_read.execute( db=self.db,
                             proc="sql.ds_selects.get_row_count",
                             nocommit=True,
                             replace=['auto_pfamA', self.table_name],
@@ -619,14 +621,7 @@ class TestMySQLHub(unittest.TestCase):
                        nocommit=True,
                        placeholders=row)
 
-        rowcount_after = dh.execute( db=self.db,
-                            proc="sql.ds_selects.get_row_count",
-                            nocommit=True,
-                            replace=['auto_pfamA', self.table_name],
-                            return_type='iter').get_column_data('rowcount')
-
-
-        rowcount_after_commit = dh.execute( db=self.db,
+        rowcount_after = dh_read.execute( db=self.db,
                             proc="sql.ds_selects.get_row_count",
                             nocommit=True,
                             replace=['auto_pfamA', self.table_name],
@@ -638,10 +633,19 @@ class TestMySQLHub(unittest.TestCase):
         msg = 'Data was committed even though nocommit was set.'
         self.assertEqual(rowcount_before, rowcount_after, msg=msg)
 
-        ##Should this be a separate test?##
         dh.commit('master_host')
+        rowcount_after_commit = dh_read.execute( db=self.db,
+                            proc="sql.ds_selects.get_row_count",
+                            nocommit=True,
+                            replace=['auto_pfamA', self.table_name],
+                            return_type='iter').get_column_data('rowcount')
+
+        print rowcount_after_commit
+
+
+        ##Should this be a separate test?##
         msg = 'Data was not committed despite calling commit.'
-        self.assertNotEqual(rowcount_before, rowcount_after, msg=msg)
+        self.assertNotEqual(rowcount_before, rowcount_after_commit, msg=msg)
 
     def test_drop_table(self):
 
