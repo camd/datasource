@@ -55,7 +55,7 @@
                `term` longtext NOT NULL,
                `category` tinytext NOT NULL,
                KEY `auto_pfamA` (`auto_pfamA`)
-            ) ENGINE=MyISAM DEFAULT CHARSET=utf8",
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8",
    "host_type":"master_host"
    },
 

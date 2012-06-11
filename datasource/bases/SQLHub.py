@@ -70,7 +70,7 @@ class SQLHub(RDBSHub):
                    'get_set_json',
                    'get_callback']
 
-    def commit(self):
+    def commit(self, host_type):
         ##Expose commit for manual transaction committing##
         SQLHub.connection[host_type]['con_obj'].commit()
 

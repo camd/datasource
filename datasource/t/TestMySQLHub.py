@@ -608,6 +608,9 @@ class TestMySQLHub(unittest.TestCase):
                             replace=['auto_pfamA', self.table_name],
                             return_type='iter').get_column_data('rowcount')
 
+        dh.execute( db=self.db,
+                    proc="sql.ds_use.begin_transaction")
+
         ##Load Data##
         for row in TestMySQLHub.test_data:
             dh.execute(proc="test.insert_test_data",
@@ -615,6 +618,14 @@ class TestMySQLHub(unittest.TestCase):
                        placeholders=row)
 
         rowcount_after = dh.execute( db=self.db,
+                            proc="sql.ds_selects.get_row_count",
+                            replace=['auto_pfamA', self.table_name],
+                            nocommit=True,
+                            return_type='iter').get_column_data('rowcount')
+
+        dh.commit('master_host')
+
+        rowcount_after_commit = dh.execute( db=self.db,
                             proc="sql.ds_selects.get_row_count",
                             replace=['auto_pfamA', self.table_name],
                             return_type='iter').get_column_data('rowcount')
