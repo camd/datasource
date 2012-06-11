@@ -623,13 +623,12 @@ class TestMySQLHub(unittest.TestCase):
                             proc="sql.ds_selects.get_row_count",
                             nocommit=True,
                             replace=['auto_pfamA', self.table_name],
-                            nocommit=True,
                             return_type='iter').get_column_data('rowcount')
 
-        dh.commit('master_host')
 
         rowcount_after_commit = dh.execute( db=self.db,
                             proc="sql.ds_selects.get_row_count",
+                            nocommit=True,
                             replace=['auto_pfamA', self.table_name],
                             return_type='iter').get_column_data('rowcount')
 
@@ -639,6 +638,10 @@ class TestMySQLHub(unittest.TestCase):
         msg = 'Data was committed even though nocommit was set.'
         self.assertEqual(rowcount_before, rowcount_after, msg=msg)
 
+        ##Should this be a separate test?##
+        dh.commit('master_host')
+        msg = 'Data was not committed despite calling commit.'
+        self.assertNotEqual(rowcount_before, rowcount_after, msg=msg)
 
     def test_drop_table(self):
 
