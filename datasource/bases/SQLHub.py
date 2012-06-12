@@ -70,10 +70,13 @@ class SQLHub(RDBSHub):
                    'get_set_json',
                    'get_callback']
 
+    ##Expose commit, rollback for manual transaction support##
+    ##begin() is implicit when a cursor calls execute##
     def commit(self, host_type):
-        ##Expose commit for manual transaction committing##
         self.connection[host_type]['con_obj'].commit()
 
+    def rollback(self, host_type):
+        self.connection[host_type]['con_obj'].rollback()
 
     def get_databases(self):
         """

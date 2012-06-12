@@ -73,6 +73,7 @@ class TestMySQLHub(unittest.TestCase):
                  'test_big_replace',
                  'test_executemany',
                  'test_nocommit',
+                 'test_rollback',
                  'test_drop_table',
                  ]
 
@@ -672,6 +673,38 @@ class TestMySQLHub(unittest.TestCase):
 
         dh_read.disconnect()
 
+    def test_rollback(self):
+        dh_read = MySQL(self.data_source)
+        dh_read.use_database('test')
+
+        rowcount_before = dh_read.execute(
+            db=self.db,
+            proc="sql.ds_selects.get_row_count",
+            nocommit=True,
+            replace=['auto_pfamA', self.table_name],
+            return_type='iter',
+            ).get_column_data('rowcount')
+
+        self.dh.execute(db=self.db, nocommit=True, proc="test.insert_dummy_row")
+        self.dh.rollback('master_host')
+        self.dh.commit('master_host')
+
+        dh_read.disconnect()
+        dh_read = MySQL(self.data_source)
+        dh_read.use_database('test')
+
+        rowcount_after = dh_read.execute(
+            db=self.db,
+            proc="sql.ds_selects.get_row_count",
+            nocommit=True,
+            replace=['auto_pfamA', self.table_name],
+            return_type='iter',        
+            ).get_column_data('rowcount')
+
+        dh_read.disconnect()
+
+        msg = "A row was inserted despite rollback."
+        self.assertEqual(rowcount_before, rowcount_after, msg=msg)
 
     def test_drop_table(self):
         self.dh.execute(db=self.db, proc="test.drop_table")
