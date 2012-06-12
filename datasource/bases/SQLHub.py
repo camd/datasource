@@ -48,7 +48,7 @@ class SQLHub(RDBSHub):
         SQLHub.connection[ host_type ][ con_obj="Connection Object",
                                   cursor="Database cursor" ]
         """
-        SQLHub.connection = dict()
+        self.connection = dict()
 
         ##Configuration object for data source instance##
         self.conf = self.get_data_source_config(self.data_source)
@@ -72,7 +72,7 @@ class SQLHub(RDBSHub):
 
     def commit(self, host_type):
         ##Expose commit for manual transaction committing##
-        SQLHub.connection[host_type]['con_obj'].commit()
+        self.connection[host_type]['con_obj'].commit()
 
 
     def get_databases(self):
@@ -236,13 +236,13 @@ class SQLHub(RDBSHub):
         Return:
            None
         """
-        for host_type in SQLHub.connection:
-            if SQLHub.connection[host_type]['cursor']:
-                SQLHub.connection[host_type]['cursor'].close()
+        for host_type in self.connection:
+            if self.connection[host_type]['cursor']:
+                self.connection[host_type]['cursor'].close()
 
-            if SQLHub.connection[host_type]['con_obj'].open:
-                SQLHub.connection[host_type]['con_obj'].commit()
-                SQLHub.connection[host_type]['con_obj'].close()
+            if self.connection[host_type]['con_obj'].open:
+                self.connection[host_type]['con_obj'].commit()
+                self.connection[host_type]['con_obj'].close()
 
 
     """
@@ -262,7 +262,7 @@ class SQLHub(RDBSHub):
         if self.client_cursor:
             cursor = self.client_cursor
         else:
-            cursor = SQLHub.connection[host_type]['cursor']
+            cursor = self.connection[host_type]['cursor']
 
         ##Get the proc name for debug message##
         proc = ""
@@ -308,7 +308,7 @@ class SQLHub(RDBSHub):
         if ('nocommit' in kwargs) and (kwargs['nocommit']):
             pass
         else:
-            SQLHub.connection[host_type]['con_obj'].commit()
+            self.connection[host_type]['con_obj'].commit()
 
         return self.get_data(cursor, kwargs)
 

@@ -599,9 +599,11 @@ class TestMySQLHub(unittest.TestCase):
 
     def test_nocommit(self):
 
+        ##MySQL connection for a transaction##
         dh = MySQL(self.data_source)
         dh.use_database('test')
 
+        ##MySQL connection exclusively for reads##
         dh_read = MySQL(self.data_source)
         dh_read.use_database('test')
 
@@ -610,10 +612,6 @@ class TestMySQLHub(unittest.TestCase):
                             nocommit=True,
                             replace=['auto_pfamA', self.table_name],
                             return_type='iter').get_column_data('rowcount')
-        print rowcount_before
-
-        dh.execute( db=self.db,
-                    proc="sql.ds_use.begin_transaction")
 
         ##Load Data##
         for row in TestMySQLHub.test_data:
@@ -621,29 +619,35 @@ class TestMySQLHub(unittest.TestCase):
                        nocommit=True,
                        placeholders=row)
 
+        """
+        Need to make a new connection for each read to accurately obtain
+        the current row count (because of MySQL's default, repeatable-read)
+        """
+        dh_read = MySQL(self.data_source)
+        dh_read.use_database('test')
         rowcount_after = dh_read.execute( db=self.db,
                             proc="sql.ds_selects.get_row_count",
                             nocommit=True,
                             replace=['auto_pfamA', self.table_name],
                             return_type='iter').get_column_data('rowcount')
 
-        print rowcount_after
-
         ##Confirm we loaded all of the rows##
         msg = 'Data was committed even though nocommit was set.'
         self.assertEqual(rowcount_before, rowcount_after, msg=msg)
 
+        ##Call the SQLHub commit function##
         dh.commit('master_host')
+
+        ##New connection##
+        dh_read = MySQL(self.data_source)
+        dh_read.use_database('test')
         rowcount_after_commit = dh_read.execute( db=self.db,
                             proc="sql.ds_selects.get_row_count",
                             nocommit=True,
                             replace=['auto_pfamA', self.table_name],
                             return_type='iter').get_column_data('rowcount')
 
-        print rowcount_after_commit
-
-
-        ##Should this be a separate test?##
+        ##Confirm the transaction was actually committed##
         msg = 'Data was not committed despite calling commit.'
         self.assertNotEqual(rowcount_before, rowcount_after_commit, msg=msg)
 
