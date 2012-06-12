@@ -1,6 +1,3 @@
-import sys
-import time
-import re
 from timeit import Timer
 
 try:
