@@ -5,7 +5,6 @@ import json
 
 from datasource.bases.BaseHub import BaseHub
 from datasource.bases.RDBSHub import RDBSHub, RDBSHubExecuteError
-from datasource.DataHub import DataHub
 
 from datasource.hubs.MySQL import MySQL
 
@@ -22,6 +21,7 @@ class TestMySQLHub(unittest.TestCase):
     else:
         data_file = './test_data.txt'
 
+
     @staticmethod
     def load_data():
 
@@ -34,6 +34,7 @@ class TestMySQLHub(unittest.TestCase):
             data_file_obj.close()
 
         TestMySQLHub.test_data_rows = len(TestMySQLHub.test_data)
+
 
     @staticmethod
     def getSuite():
@@ -48,7 +49,7 @@ class TestMySQLHub(unittest.TestCase):
            test suite
         """
         tests = ['test_parse_data_sources',
-                 'test_db_existance',
+                 'test_db_existence',
                  'test_execute_rules',
                  'test_create_data_table',
                  'test_load_data',
@@ -73,46 +74,40 @@ class TestMySQLHub(unittest.TestCase):
                  'test_executemany',
                  'test_nocommit',
                  'test_drop_table',
-                 'test_disconnect']
+                 ]
 
         return unittest.TestSuite(map(TestMySQLHub, tests))
 
-    def setUp(self):
 
-        ####
-        #TODO:
-        #Most of the attribute initializations would be better placed
-        #in __init__.  However, I get a doc string related error when
-        #I try that from the base class, not sure why.  Skipping for now.
-        ###
+    def setUp(self):
         self.test_data_rows = 0
         self.data_source = 'MySQL_test'
         self.db = 'test'
         self.table_name = 'DATA_SOURCES_TEST_DATA'
         self.callback_calls = 0
         self.limit = 100
-        self.nsets = 986
         self.columns = set(['category', 'term', 'go_id', 'id', 'auto_pfamA'])
+        self.dh = MySQL(self.data_source)
+
 
     def tearDown(self):
+        self.dh.disconnect()
         sys.stdout.flush()
 
-    def test_parse_data_sources(self):
 
-        ##Instantiating base hub triggers data_sources.json parsing##
-        bh = BaseHub()
+    def test_parse_data_sources(self):
         if self.data_source not in BaseHub.data_sources:
             msg = "The required data source, %s, was not found in %s" % (self.data_source, BaseHub.source_list_file)
-            fail(msg)
+            self.fail(msg)
 
-    def test_db_existance(self):
 
-        dh = MySQL(self.data_source)
-        dbs = dh.get_databases()
+    def test_db_existence(self):
+        dbs = self.dh.get_databases()
 
         if 'test' not in dbs:
             msg = "No 'test' database found in %s.  To run this method create a 'test' db in %s." % (self.data_source, self.data_source)
             self.fail(msg)
+
 
     def test_execute_rules(self):
 
@@ -157,49 +152,58 @@ class TestMySQLHub(unittest.TestCase):
         args = dict(chunk_source='table.column', proc='fake.proc')
         self.__try_it(rh, args)
 
+
     def test_create_data_table(self):
 
-        dh = MySQL(self.data_source)
-        dh.execute(db=self.db,
-                   proc="test.create_table")
+        self.dh.execute(
+            db=self.db,
+            proc="test.create_table",
+            )
 
-        table_set = dh.execute(db=self.db,
-                             proc="sql.ds_selects.get_tables",
-                             key_column="Tables_in_test",
-                             return_type="set")
+        table_set = self.dh.execute(
+            db=self.db,
+            proc="sql.ds_selects.get_tables",
+            key_column="Tables_in_test",
+            return_type="set",
+            )
 
         if self.table_name not in table_set:
-            msg = "The table, %s, was not created in %s." % (self.table_name, self.db)
+            msg = "The table, %s, was not created in %s." % (
+                self.table_name, self.db)
             self.fail(msg)
 
-    def test_load_data(self):
 
-        dh = MySQL(self.data_source)
-        dh.use_database('test')
+    def test_load_data(self):
+        self.dh.use_database('test')
 
         ##Load Data##
         for row in TestMySQLHub.test_data:
-            dh.execute(proc="test.insert_test_data",
-                       placeholders=row)
+            self.dh.execute(
+                proc="test.insert_test_data",
+                placeholders=row,
+                )
 
-        rowcount = dh.execute( db=self.db,
-                            proc="sql.ds_selects.get_row_count",
-                            replace=['auto_pfamA', self.table_name],
-                            return_type='iter').get_column_data('rowcount')
+        rowcount = self.dh.execute(
+            db=self.db,
+            proc="sql.ds_selects.get_row_count",
+            replace=['auto_pfamA', self.table_name],
+            return_type='iter',
+            ).get_column_data('rowcount')
 
         ##Confirm we loaded all of the rows##
         msg = 'Row count in data file, %i, does not match row count in db %i.' % (TestMySQLHub.test_data_rows, rowcount)
         self.assertEqual(rowcount, TestMySQLHub.test_data_rows, msg=msg)
 
+
     def test_table_iter(self):
+        iter = self.dh.execute(
+            db=self.db,
+            proc="test.get_data",
+            return_type='iter',
+            )
 
-        dh = MySQL(self.data_source)
-
-        iter = dh.execute( db=self.db,
-                           proc="test.get_data",
-                           return_type='iter')
-
-        msg = 'Row count in iter, %i, does not match row count in db %i.' % (iter.rowcount, TestMySQLHub.test_data_rows)
+        msg = 'Row count in iter, %i, does not match row count in db %i.' % (
+            iter.rowcount, TestMySQLHub.test_data_rows)
         self.assertEqual(iter.rowcount, TestMySQLHub.test_data_rows, msg=msg)
 
         rowcount = 0
@@ -209,14 +213,15 @@ class TestMySQLHub(unittest.TestCase):
         msg = 'The iterations in iter, %i, do not match the row count in db %i.' % (rowcount, TestMySQLHub.test_data_rows)
         self.assertEqual(iter.rowcount, TestMySQLHub.test_data_rows, msg=msg)
 
+
     def test_iter_return_type(self):
+        iter = self.dh.execute(
+            db=self.db,
+            proc="test.get_data",
+            limit=self.limit,
+            return_type='iter',
+            )
 
-        dh = MySQL(self.data_source)
-
-        iter = dh.execute( db=self.db,
-                           proc="test.get_data",
-                           limit=self.limit,
-                           return_type='iter')
         rowcount = 0
         columns = set()
         for row in iter:
@@ -233,25 +238,28 @@ class TestMySQLHub(unittest.TestCase):
         msg = 'The column names in iter, %s, do not match %s.' % (','.join(columns), ','.join(self.columns))
         self.assertEqual(columns, self.columns)
 
-        iter = dh.execute( db=self.db,
-                           proc="test.get_data",
-                           limit=1,
-                           return_type='iter')
+        iter = self.dh.execute(
+            db=self.db,
+            proc="test.get_data",
+            limit=1,
+            return_type='iter',
+            )
 
         term = iter.get_column_data('term')
         if not term:
             msg = 'iter.get_column_data failed to retrieve `term` column.'
-            fail(msg)
+            self.fail(msg)
+
 
     def test_dict_return_type(self):
+        data = self.dh.execute(
+            db=self.db,
+            proc="test.get_data",
+            limit=self.limit,
+            key_column='id',
+            return_type='dict',
+            )
 
-        dh = MySQL(self.data_source)
-
-        data = dh.execute( db=self.db,
-                           proc="test.get_data",
-                           limit=self.limit,
-                           key_column='id',
-                           return_type='dict')
         rowcount = len(data)
         columns = set(data[1].keys())
 
@@ -264,15 +272,15 @@ class TestMySQLHub(unittest.TestCase):
         msg = 'The column names in data dictionary, %s, do not match %s.' % (','.join(columns), ','.join(self.columns))
         self.assertEqual(columns, self.columns)
 
+
     def test_dict_json_return_type(self):
-
-        dh = MySQL(self.data_source)
-
-        j = dh.execute( db=self.db,
-                        proc="test.get_data",
-                        limit=self.limit,
-                        key_column='id',
-                        return_type='dict_json')
+        j = self.dh.execute(
+            db=self.db,
+            proc="test.get_data",
+            limit=self.limit,
+            key_column='id',
+            return_type='dict_json',
+            )
 
         data = json.loads(j)
         rowcount = len(data)
@@ -286,14 +294,14 @@ class TestMySQLHub(unittest.TestCase):
         msg = 'The column names in data dictionary, %s, do not match %s.' % (','.join(columns), ','.join(self.columns))
         self.assertEqual(columns, self.columns)
 
+
     def test_tuple_return_type(self):
-
-        dh = MySQL(self.data_source)
-
-        data = dh.execute( db=self.db,
-                           proc="test.get_data",
-                           limit=self.limit,
-                           return_type='tuple')
+        data = self.dh.execute(
+            db=self.db,
+            proc="test.get_data",
+            limit=self.limit,
+            return_type='tuple',
+            )
 
         rowcount = len(data)
         columns = set(data[0].keys())
@@ -307,14 +315,14 @@ class TestMySQLHub(unittest.TestCase):
         msg = 'The column names in data tuple, %s, do not match %s.' % (','.join(columns), ','.join(self.columns))
         self.assertEqual(columns, self.columns)
 
+
     def test_tuple_json_return_type(self):
-
-        dh = MySQL(self.data_source)
-
-        j = dh.execute( db=self.db,
-                        proc="test.get_data",
-                        limit=self.limit,
-                        return_type='tuple_json')
+        j = self.dh.execute(
+            db=self.db,
+            proc="test.get_data",
+            limit=self.limit,
+            return_type='tuple_json',
+            )
 
         data = json.loads(j)
 
@@ -327,11 +335,9 @@ class TestMySQLHub(unittest.TestCase):
         msg = 'The column names in data tuple, %s, do not match %s.' % (','.join(columns), ','.join(self.columns))
         self.assertEqual(columns, self.columns)
 
+
     def test_set_return_type(self):
-
-        dh = MySQL(self.data_source)
-
-        data = dh.execute( db=self.db,
+        data = self.dh.execute( db=self.db,
                            proc="test.get_data",
                            limit=self.limit,
                            key_column='id',
@@ -345,15 +351,15 @@ class TestMySQLHub(unittest.TestCase):
         msg = 'The items in data set, %i, do not match the row count %i.' % (rowcount, self.limit)
         self.assertEqual(rowcount, self.limit, msg=msg)
 
+
     def test_set_json_return_type(self):
-
-        dh = MySQL(self.data_source)
-
-        j = dh.execute( db=self.db,
-                           proc="test.get_data",
-                           limit=self.limit,
-                           key_column='id',
-                           return_type='set_json')
+        j = self.dh.execute(
+            db=self.db,
+            proc="test.get_data",
+            limit=self.limit,
+            key_column='id',
+            return_type='set_json',
+            )
 
         data = json.loads(j)
         rowcount = len(data)
@@ -361,14 +367,14 @@ class TestMySQLHub(unittest.TestCase):
         msg = 'The items in data set, %i, do not match the row count %i.' % (rowcount, self.limit)
         self.assertEqual(rowcount, self.limit, msg=msg)
 
+
     def test_table_return_type(self):
-
-        dh = MySQL(self.data_source)
-
-        data = dh.execute( db=self.db,
-                           proc="test.get_data",
-                           limit=self.limit,
-                           return_type='table')
+        data = self.dh.execute(
+            db=self.db,
+            proc="test.get_data",
+            limit=self.limit,
+            return_type='table',
+            )
 
         if 'columns' not in data:
             msg = "The columns key was not found in data."
@@ -382,14 +388,14 @@ class TestMySQLHub(unittest.TestCase):
         msg = 'The items in data set, %i, do not match the row count %i.' % (rowcount, self.limit)
         self.assertEqual(rowcount, self.limit, msg=msg)
 
+
     def test_table_json_return_type(self):
-
-        dh = MySQL(self.data_source)
-
-        j = dh.execute( db=self.db,
-                        proc="test.get_data",
-                        limit=self.limit,
-                        return_type='table_json')
+        j = self.dh.execute(
+            db=self.db,
+            proc="test.get_data",
+            limit=self.limit,
+            return_type='table_json',
+            )
 
         data = json.loads(j)
 
@@ -405,80 +411,82 @@ class TestMySQLHub(unittest.TestCase):
         msg = 'The items in data set, %i, do not match the row count %i.' % (rowcount, self.limit)
         self.assertEqual(rowcount, self.limit, msg=msg)
 
+
     def test_callback_return_type(self):
-
-        dh = MySQL(self.data_source)
-
-        dh.execute( db=self.db,
-                    proc="test.get_data",
-                    callback=self.__callback_test,
-                    limit=self.limit,
-                    return_type='callback')
+        self.dh.execute(
+            db=self.db,
+            proc="test.get_data",
+            callback=self.__callback_test,
+            limit=self.limit,
+            return_type='callback',
+            )
 
         msg = 'self.callback_calls, %i, does not match the row count %i.' % (self.callback_calls, self.limit)
         self.assertEqual(self.callback_calls, self.limit, msg=msg)
 
+
     def test_chunking(self):
-
         chunk_size = 10
-        dh = MySQL(self.data_source)
-
         nsets = 0
-        for d in  dh.execute( db=self.db,
-                              proc="test.get_data",
-                              chunk_size=10,
-                              chunk_source='DATA_SOURCES_TEST_DATA.id'):
+        for d in self.dh.execute(
+            db=self.db,
+            proc="test.get_data",
+            chunk_size=chunk_size,
+            chunk_source='DATA_SOURCES_TEST_DATA.id',
+            ):
 
             nsets += 1
 
-        msg = 'total chunk sets should be, %i, there were %i chunk sets found.' % (self.nsets, nsets)
-        self.assertEqual(self.nsets, nsets, msg=msg)
+        msg = 'total chunk sets should be, %i, there were %i chunk sets found.' % (986, nsets)
+        self.assertEqual(986, nsets, msg=msg)
+
 
     def test_chunking_with_min(self):
-
-        chunk_size = 10
-        dh = MySQL(self.data_source)
+        chunk_size = 100
 
         nsets = 0
-        for d in  dh.execute( db=self.db,
-                              proc="test.get_data",
-                              chunk_size=100,
-                              chunk_min=5,
-                              chunk_source='DATA_SOURCES_TEST_DATA.id'):
+        for d in self.dh.execute(
+            db=self.db,
+            proc="test.get_data",
+            chunk_size=chunk_size,
+            chunk_min=5,
+            chunk_source='DATA_SOURCES_TEST_DATA.id',
+            ):
 
             nsets += 1
 
         msg = 'total chunk sets should be, %i, there were %i chunk sets found.' % (99, nsets)
         self.assertEqual(99, nsets, msg=msg)
 
+
     def test_chunking_with_records(self):
-
-        chunk_size = 10
-        dh = MySQL(self.data_source)
-
+        chunk_size = 5
         nsets = 0
-        for d in  dh.execute( db=self.db,
-                              proc="test.get_data",
-                              chunk_size=5,
-                              chunk_total=50,
-                              chunk_source='DATA_SOURCES_TEST_DATA.id'):
+        for d in self.dh.execute(
+            db=self.db,
+            proc="test.get_data",
+            chunk_size=chunk_size,
+            chunk_total=50,
+            chunk_source='DATA_SOURCES_TEST_DATA.id',
+            ):
 
             nsets += 1
 
         msg = 'total chunk sets should be, %i, there were %i chunk sets found.' % (10, nsets)
         self.assertEqual(10, nsets, msg=msg)
 
+
     def test_raw_sql(self):
 
         sql = """SELECT `id`, `auto_pfamA`, `go_id`, `term`, `category`
                  FROM `test`.`DATA_SOURCES_TEST_DATA`"""
 
-        dh = MySQL(self.data_source)
-
-        data = dh.execute( db=self.db,
-                           sql=sql,
-                           limit=self.limit,
-                           return_type='tuple')
+        data = self.dh.execute(
+            db=self.db,
+            sql=sql,
+            limit=self.limit,
+            return_type='tuple',
+            )
 
         rowcount = len(data)
         columns = set(data[0].keys())
@@ -489,6 +497,7 @@ class TestMySQLHub(unittest.TestCase):
         msg = 'The column names in data tuple, %s, do not match %s.' % (','.join(columns), ','.join(self.columns))
         self.assertEqual(columns, self.columns)
 
+
     def test_replace(self):
 
         rep_values = ['id',
@@ -498,18 +507,19 @@ class TestMySQLHub(unittest.TestCase):
                      'category',
                      'DATA_SOURCES_TEST_DATA']
 
-        dh = MySQL(self.data_source)
-
-        data = dh.execute( db=self.db,
-                           proc="test.get_data_replace",
-                           limit=self.limit,
-                           replace=rep_values,
-                           return_type='tuple')
+        data = self.dh.execute(
+            db=self.db,
+            proc="test.get_data_replace",
+            limit=self.limit,
+            replace=rep_values,
+            return_type='tuple',
+            )
 
         rowcount = len(data)
 
         msg = 'The items in data tuple, %i, do not match the row count %i.' % (rowcount, self.limit)
         self.assertEqual(rowcount, self.limit, msg=msg)
+
 
     def test_replace_quote(self):
 
@@ -518,18 +528,19 @@ class TestMySQLHub(unittest.TestCase):
                        "GO:0003700",
                        "GO:0000795" ]
 
-        dh = MySQL(self.data_source)
-
-        data = dh.execute( db=self.db,
-                           proc="test.get_replace_quote",
-                           replace_quote=[rep_values],
-                           return_type='tuple')
+        data = self.dh.execute(
+            db=self.db,
+            proc="test.get_replace_quote",
+            replace_quote=[rep_values],
+            return_type='tuple',
+            )
 
         rows = 90
         rowcount = len(data)
 
         msg = 'The items in data tuple, %i, do not match the row count %i.' % (rowcount, rows)
         self.assertEqual(rowcount, rows, msg=msg)
+
 
     def test_placeholder_quote(self):
 
@@ -538,18 +549,19 @@ class TestMySQLHub(unittest.TestCase):
               "GO:0003700",
               "GO:0000795" ]
 
-        dh = MySQL(self.data_source)
-
-        data = dh.execute( db=self.db,
-                           proc="test.get_placeholder_quote",
-                           placeholders=p,
-                           return_type='tuple')
+        data = self.dh.execute(
+            db=self.db,
+            proc="test.get_placeholder_quote",
+            placeholders=p,
+            return_type='tuple',
+            )
 
         rows = 90
         rowcount = len(data)
 
         msg = 'The items in data tuple, %i, do not match the row count %i.' % (rowcount, rows)
         self.assertEqual(rowcount, rows, msg=msg)
+
 
     def test_big_replace(self):
 
@@ -563,127 +575,134 @@ class TestMySQLHub(unittest.TestCase):
                      'DATA_SOURCES_TEST_DATA',
                      ids]
 
-        dh = MySQL(self.data_source)
+        self.dh.execute(
+            db=self.db,
+            proc="test.get_big_replace",
+            limit=self.limit,
+            replace=rep_values,
+            return_type='tuple',
+            )
 
-        data = dh.execute( db=self.db,
-                           proc="test.get_big_replace",
-                           limit=self.limit,
-                           replace=rep_values,
-                           return_type='tuple')
-
-        rowcount = len(data)
 
     def test_executemany(self):
-
-        dh = MySQL(self.data_source)
-        dh.use_database('test')
+        self.dh.use_database('test')
 
         ##Load Data##
         placeholders = []
         for row in TestMySQLHub.test_data:
             placeholders.append( row )
 
-        dh.execute(proc="test.insert_test_data",
-                   executemany=True,
-                   placeholders=placeholders)
+        self.dh.execute(
+            proc="test.insert_test_data",
+            executemany=True,
+            placeholders=placeholders,
+            )
 
-        rowcount = dh.execute( db=self.db,
-                            proc="sql.ds_selects.get_row_count",
-                            replace=['auto_pfamA', self.table_name],
-                            return_type='iter').get_column_data('rowcount')
+        rowcount = self.dh.execute(
+            db=self.db,
+            proc="sql.ds_selects.get_row_count",
+            replace=['auto_pfamA', self.table_name],
+            return_type='iter',
+            ).get_column_data('rowcount')
 
         ##Confirm we loaded all of the rows##
         target_rowcount = 2*TestMySQLHub.test_data_rows
         msg = 'Row count in data file, %i, does not match row count in db %i.' % (target_rowcount, rowcount)
         self.assertEqual(rowcount, target_rowcount, msg=msg)
 
+
     def test_nocommit(self):
+        self.dh.use_database('test')
 
-        ##MySQL connection for a transaction##
-        dh = MySQL(self.data_source)
-        dh.use_database('test')
-
-        ##MySQL connection exclusively for reads##
+        # MySQL connection exclusively for reads
         dh_read = MySQL(self.data_source)
         dh_read.use_database('test')
 
-        rowcount_before = dh_read.execute( db=self.db,
-                            proc="sql.ds_selects.get_row_count",
-                            nocommit=True,
-                            replace=['auto_pfamA', self.table_name],
-                            return_type='iter').get_column_data('rowcount')
+        rowcount_before = dh_read.execute(
+            db=self.db,
+            proc="sql.ds_selects.get_row_count",
+            nocommit=True,
+            replace=['auto_pfamA', self.table_name],
+            return_type='iter',
+            ).get_column_data('rowcount')
 
-        ##Load Data##
+        # Load Data
         for row in TestMySQLHub.test_data:
-            dh.execute(proc="test.insert_test_data",
-                       nocommit=True,
-                       placeholders=row)
+            self.dh.execute(
+                proc="test.insert_test_data",
+                nocommit=True,
+                placeholders=row,
+                )
 
-        """
-        Need to make a new connection for each read to accurately obtain
-        the current row count (because of MySQL's default, repeatable-read)
-        """
+        # Need to make a new connection for each read to accurately obtain the
+        # current row count (because of MySQL's default, repeatable-read)
+        dh_read.disconnect()
         dh_read = MySQL(self.data_source)
         dh_read.use_database('test')
-        rowcount_after = dh_read.execute( db=self.db,
-                            proc="sql.ds_selects.get_row_count",
-                            nocommit=True,
-                            replace=['auto_pfamA', self.table_name],
-                            return_type='iter').get_column_data('rowcount')
+        rowcount_after = dh_read.execute(
+            db=self.db,
+            proc="sql.ds_selects.get_row_count",
+            nocommit=True,
+            replace=['auto_pfamA', self.table_name],
+            return_type='iter',
+            ).get_column_data('rowcount')
 
-        ##Confirm we loaded all of the rows##
+        # Confirm we loaded all of the rows
         msg = 'Data was committed even though nocommit was set.'
         self.assertEqual(rowcount_before, rowcount_after, msg=msg)
 
-        ##Call the SQLHub commit function##
-        dh.commit('master_host')
+        # Call the SQLHub commit function
+        self.dh.commit('master_host')
 
-        ##New connection##
+        # New connection
+        dh_read.disconnect()
         dh_read = MySQL(self.data_source)
         dh_read.use_database('test')
-        rowcount_after_commit = dh_read.execute( db=self.db,
-                            proc="sql.ds_selects.get_row_count",
-                            nocommit=True,
-                            replace=['auto_pfamA', self.table_name],
-                            return_type='iter').get_column_data('rowcount')
+        rowcount_after_commit = dh_read.execute(
+            db=self.db,
+            proc="sql.ds_selects.get_row_count",
+            nocommit=True,
+            replace=['auto_pfamA', self.table_name],
+            return_type='iter',
+            ).get_column_data('rowcount')
 
-        ##Confirm the transaction was actually committed##
+        # Confirm the transaction was actually committed
         msg = 'Data was not committed despite calling commit.'
         self.assertNotEqual(rowcount_before, rowcount_after_commit, msg=msg)
 
+        dh_read.disconnect()
+
+
     def test_drop_table(self):
+        self.dh.execute(db=self.db, proc="test.drop_table")
 
-        dh = MySQL(self.data_source)
-
-        dh.execute(db=self.db,
-                   proc="test.drop_table")
-
-        table_set = dh.execute(db=self.db,
-                             proc="sql.ds_selects.get_tables",
-                             key_column="Tables_in_test",
-                             return_type="set")
+        table_set = self.dh.execute(
+            db=self.db,
+            proc="sql.ds_selects.get_tables",
+            key_column="Tables_in_test",
+            return_type="set",
+            )
 
         if self.table_name in table_set:
             msg = "The table, %s, was not dropped in %s." % (self.table_name, self.db)
             self.fail(msg)
 
-    def test_disconnect(self):
-
-        dh = MySQL(self.data_source)
-        dh.disconnect()
 
     def __callback_test(self, row):
         self.callback_calls += 1
 
+
     def __try_it(self, rh, args):
         try:
             rh.set_execute_rules(args)
-        except RDBSHubExecuteError, err:
+        except RDBSHubExecuteError:
             ##Yay! test worked
             pass
         else:
             ##OOh we should have an error here##
             self.fail("\tShould have raised RDBSHubExecuteError on args:%s" % (','.join(args.keys())))
+
+
 
 def main():
     ##Load test data one time##
@@ -691,6 +710,8 @@ def main():
 
     suite = TestMySQLHub.getSuite()
     unittest.TextTestRunner(verbosity=2).run(suite)
+
+
 
 if __name__ == '__main__':
     main()
