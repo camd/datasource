@@ -248,11 +248,11 @@ Get Started In A Blind Animal Rage Filled Fury!
     from datasource.DataHub import DataHub
     dh = DataHub("mydatasourcename")
 
-    ##Get me some data##
+    #Get me some data
     data = dh.execute(proc="my.super.duper.proc",
                       return_type="tuple")
 
-    ##Data looks like this##
+    #Data looks like this
     ( {'column_name1':value,
        'column_name2':value,
        'column_name3':value },
@@ -273,42 +273,34 @@ datasource repository structure
      is required by the datasource.  It also provides a command line
      interface for testing procs and their associated output.
 
-``/datasource/bases``
-   - Directory for all base classes.  Base classes for new data hubs
-     should be placed in this directory.
+* ``/datasource/bases`` - Directory for all base classes.  Base classes for 
+    new data hubs should be placed in this directory.
 
-    ``BaseHub.py``
-          - All data hubs inherit from the BaseHub.  This module provides all
-            of the facilities for loading/parsing the datasource file.
+    * ``BaseHub.py`` - All data hubs inherit from the BaseHub.  This module 
+        provides all of the facilities for loading/parsing the datasource file.
+    * ``RDBSHub.py`` - Base class for all derived RDBS hubs inherits from BaseHub.
 
-    ``RDBSHub.py``
-          - Base class for all derived RDBS hubs inherits from BaseHub.
+* ``/datasource/hubs``
 
-``/datasource/hubs``
+    * ``MySQL.py`` - Data hub for MySQL databases.  Inherits from RDBSHub.
 
-   ``MySQL.py``
-      - Data hub for MySQL databases.  Inherits from RDBSHub.
+* ``/datasource/procs``
+    * ``/mysql_procs/``
+        * ``sql.json`` - General SQL for applications
+        * ``test.json`` - SQL for unit tests
 
-``/datasource/procs``
-   ``/mysql_procs/``
-      sql.json - General SQL for applications
-      test.json - SQL for unit tests
-
-``/datasource/t``
+* ``/datasource/t``
 
 Unit tests for RDBS hubs require a database called `test`.  The tests create a
-table called `DATA_SOURCES_TEST_DATA` and load /datasource/t/test_data.txt
+table called `DATA_SOURCES_TEST_DATA` and load ``/datasource/t/test_data.txt``
 into it.
 
-    TestMySQLHub.py
-      - Unit tests for MySQLHub.py
+* ``TestMySQLHub.py`` - Unit tests for MySQLHub.py
 
-    TestDataHub.py
-      - Unit tests for DataHub.py
+* ``TestDataHub.py`` - Unit tests for DataHub.py
 
-    test_data.txt
-      - Test data for all of the unit tests. This 479K file
-        contains tab delimited data.
+* ``test_data.txt``  - Test data for all of the unit tests. This 479K file
+                       contains tab delimited data.
 
 ----------------------------------
 Install Notes
@@ -326,34 +318,32 @@ to set that up.
 
 1. Set the DATASOURCES Environment Variable
 
-   #for bash
-   DATASOURCES=/path/to/my/datasources.json
-   export DATASOURCES
+        #for bash
+        DATASOURCES=/path/to/my/datasources.json
+        export DATASOURCES
 
-   You can name the file whatever you want but you need
-   the '.json' extension
+    You can name the file whatever you want but you need
+    the '.json' extension
 
-2. You can add datasources at run time like this::
+2. You can add datasources at run time like this:
 
-
-    from datasource.bases.BaseHub import BaseHub
-
-    data_source = { DATASOURCE_NAME : { "hub":"MySQL",
-                                       "master_host":{"host":HOST,
-                                                     "user":USER,
-                                                     "passwd":PASSWORD},
-                                      "default_db":DATABASE,
-                                      "procs": ["/path/to/procs/myprocs.json")]
-                                     }
-    }
-
-    BaseHub.add_data_source(data_source)
-
+        from datasource.bases.BaseHub import BaseHub
+    
+        data_source = { DATASOURCE_NAME : { "hub":"MySQL",
+                                           "master_host":{"host":HOST,
+                                                         "user":USER,
+                                                         "passwd":PASSWORD},
+                                          "default_db":DATABASE,
+                                          "procs": ["/path/to/procs/myprocs.json")]
+                                         }
+        }
+    
+        BaseHub.add_data_source(data_source)
 
     The structure of data_source should be the
     same as the datasources file.
 
-3. There is a data_source.json file in the datasource directory.
+3. There is a data_source.json file in the ``/datasource`` directory.
    This is used for unit tests.  It runs tests on a database named
    'test' on localhost.  Feel free to edit the host info if you
    want to run unit tests.  You can add sources to it but be aware
@@ -386,7 +376,7 @@ RDBS - datasource file description:
 -----------------------------------
 This is an excerpt of a datasource file that is used by the unit tests.
 
-   { "MySQL_test": { "hub":"MySQL",
+    { "MySQL_test": { "hub":"MySQL",
                      "master_host": { "host":"localhost",
                                       "user":"jeads",
                                       "passwd":"pwd" },
@@ -413,39 +403,39 @@ This is an excerpt of a datasource file that is used by the unit tests.
 Option definitions
 ------------------
 
-Required keys:
+###Required keys
 
-      master_host - Required if not passing in a cursor, this specifies the master
-                    host to connect to.  It must be provided with a hash containing
-                    the following keys:
+* master_host - Required if not passing in a cursor, this specifies the master
+            host to connect to.  It must be provided with a hash containing
+            the following keys:
 
-                     host - hostname
-                     user - username
-                     passwd - password
+             host - hostname
+             user - username
+             passwd - password
 
-                    Note: if you are passing a cursor into the constructor this will be
-                    bypassed.  Host type is not used in this case.
+    Note: if you are passing a cursor into the constructor this will be
+    bypassed.  Host type is not used in this case.
 
-   Optional keys:
+###Optional keys
 
-      read_host - Optional, use it if you have a read only host and want to be able
-                  to specify connecting to it in the RDBSHub.
+* ``read_host`` - Optional, use it if you have a read only host and want to be able
+          to specify connecting to it in the RDBSHub.
 
-      dev_host - Optional, use it if you have a development only host and want to be able
-                 to specify connecting to it in the RDBSHub.
+* ``dev_host`` - Optional, use it if you have a development only host and want to be able
+         to specify connecting to it in the RDBSHub.
 
-      default_db - Optional, specifies a default database name to execute queries
-                   against.
+* ``default_db`` - Optional, specifies a default database name to execute queries
+           against.
 
 
 Procs file
 -------------
 
-Like the datasource file, the procs file can have python style comments.
+Like the ``datasource`` file, the procs file can have python style comments.
 As the procs get more complex comments can really help document what parameters
 to pass.  This file can have as many nested keys as you want:
 
-Ex: proc file called myprocs.json
+Ex: proc file called ``myprocs.json``
 
 
     {
@@ -465,7 +455,7 @@ Ex: proc file called myprocs.json
        }
     }
 
-All of the outer key names "key1", "key2", "key3", and "proc" are
+All of the outer key names ``key1``, ``key2``, ``key3``, and ``proc`` are
 arbitrary.  Use whatever naming convention you want.  However, keep in mind,
 to access a proc with execute you have to provide the full dot delimited proc path
 starting with the file name.
@@ -479,68 +469,68 @@ Ex: Accessing proc in execute
 RDBS procs file
 ---------------
 
-NOTE: Proc files with the name sql.json are assumed to be general SQL that
+NOTE: Proc files with the name ``sql.json`` are assumed to be general SQL that
      all datasources can share.  Any other file name will be directly associated
      with your datasource.
 
-   Required keys:
+* Required keys:
 
-      sql - Should be a string of SQL.  Use "?" for placeholders and
-            REP0, REP1, REP3, etc... for replacing reserved sections
-            of SQL.
+    ``sql`` - Should be a string of SQL.  Use "?" for placeholders and
+        REP0, REP1, REP3, etc... for replacing reserved sections
+        of SQL.
 
-   Optional keys:
+* Optional keys:
 
-      host_type - The host type to execute the query on.  Could be
-                  master_host, read_host, or dev_host.
+    ``host_type`` - The host type to execute the query on.  Could be
+              master_host, read_host, or dev_host.
+    
+    ``return_type`` - Set a default return type for a query.
+    
+    ``key_column`` - Set a default key column to use with return types
+               requiring a key.
 
-      return_type - Set a default return type for a query.
+    Ex: excerpt from ``test.json`` file
 
-      key_column - Set a default key column to use with return types
-                   requiring a key.
+        {
+             "get_data":{
+                "sql":"SELECT `id`, `auto_pfamA`, `go_id`, `term`, `category`
+                       FROM `test`.`DATA_SOURCES_TEST_DATA`",
+        
+                "host_type":"read_host"
+             },
+        
+             "get_data_set":{
+                "sql":"SELECT `id`, `auto_pfamA`, `go_id`, `term`, `category`
+                       FROM `test`.`DATA_SOURCES_TEST_DATA`
+                       WHERE id IN (?,?,?,?,?,?)",
+        
+                "host_type":"read_host"
+        
+             },
+        
+             "insert_test_data":{
+                "sql":"INSERT INTO `test`.`DATA_SOURCES_TEST_DATA` (`auto_pfamA`,
+                                                                    `go_id`,
+                                                                    `term`,
+                                                                    `category`)
+                       VALUES (?,?,?,?)",
+        
+                "host_type":"master_host"
+             }, 
+             etc... any number of sql procs
+        }
 
-      Ex: excerpt from test.json file
-      {
+Ex: Accessing proc in execute
 
-         "get_data":{
-            "sql":"SELECT `id`, `auto_pfamA`, `go_id`, `term`, `category`
-                   FROM `test`.`DATA_SOURCES_TEST_DATA`",
-
-            "host_type":"read_host"
-         },
-
-         "get_data_set":{
-            "sql":"SELECT `id`, `auto_pfamA`, `go_id`, `term`, `category`
-                   FROM `test`.`DATA_SOURCES_TEST_DATA`
-                   WHERE id IN (?,?,?,?,?,?)",
-
-            "host_type":"read_host"
-
-         },
-
-         "insert_test_data":{
-            "sql":"INSERT INTO `test`.`DATA_SOURCES_TEST_DATA` (`auto_pfamA`,
-                                                                `go_id`,
-                                                                `term`,
-                                                                `category`)
-                   VALUES (?,?,?,?)",
-
-            "host_type":"master_host"
-         },
-
-      }, etc... any number of sql procs
-   }
-
-   Ex: Accessing proc in execute
-   data = dh.execute(proc="test.get_data",
+    data = dh.execute(proc="test.get_data",
                      return_type="tuple_json")
 
-   There is an RDBS procs file found in datasource/procs/mysql/sql.json.
-   This file contains general SQL statements for mysql.  It's used by
-   the modules RDBSHub and MySQL for various functions.  It's
-   intent is to store all purpose SQL statements like "SHOW DATABASES"
-   or selecting the MIN or MAX of a column.  It's part of the
-   distribution and can be used freely.
+There is an RDBS procs file found in ``datasource/procs/mysql/sql.json``.
+This file contains general SQL statements for mysql.  It's used by
+the modules ``RDBSHub`` and ``MySQL`` for various functions.  It's
+intent is to store all purpose ``SQL`` statements like "SHOW DATABASES"
+or selecting the MIN or MAX of a column.  It's part of the
+distribution and can be used freely.
 
 ----------------------------------
 DataHub.py
@@ -557,68 +547,68 @@ related info.
 
 This interface looks like this:
 
-Usage: DataHub.py [OPTIONS]...[datasource]
-
-Provides a command line interface to the datasource hub's
-execute function. For more extensive docs see the README in datasource.
-
-Options:
-  -h, --help            show this help message and exit
-  -d DB, --db=DB        Name of database to connect to. Optional, if set in
-                        datasource.
-  -p PROC, --proc=PROC  Name of the procedure to call.
-  -H HOST_TYPE, --host_type=HOST_TYPE
-                        Possible values include master_host, read_host, or
-                        dev_host.  Defaults to master_host.
-
-  Proc Options:
-    -P PLACEHOLDERS, --placeholders=PLACEHOLDERS
-                        A list of placeholder parameters for the proc.
-    -r REPLACE, --replace=REPLACE
-                        A list of replacements to make in the proc.REP0, REP1,
-                        REP2, REP3 etc... in the sql.
-    -q REPLACE_QUOTE, --replace_quote=REPLACE_QUOTE
-                        Same as replace but the items from the list are quoted
-    -l LIMIT, --limit=LIMIT
-                        A limit to append to the sql as LIMIT integer.
-    -o OFFSET, --offset=OFFSET
-                        An offset to append to the sql as OFFSET integer.
-    -k KEY_COLUMN, --key_column=KEY_COLUMN
-                        table.column to use as a key_column for return_types
-                        of dict* or set*
-    -R RETURN_TYPE, --return_type=RETURN_TYPE
-                        Possible values are dict, dict_json, tuple, tuple_json,
-                        table, table_json, set, and set_json.  Defaults to tuple.
-
-  Debug Options:
-    -s, --debug_show    Show SQL and other info about the query including
-                        execution time.
-    -n, --debug_noex    Show SQL and other info about the query without
-                        executing it.
+    Usage: DataHub.py [OPTIONS]...[datasource]
+    
+    Provides a command line interface to the datasource hub's
+    execute function. For more extensive docs see the README in datasource.
+    
+    Options:
+      -h, --help            show this help message and exit
+      -d DB, --db=DB        Name of database to connect to. Optional, if set in
+                            datasource.
+      -p PROC, --proc=PROC  Name of the procedure to call.
+      -H HOST_TYPE, --host_type=HOST_TYPE
+                            Possible values include master_host, read_host, or
+                            dev_host.  Defaults to master_host.
+    
+      Proc Options:
+        -P PLACEHOLDERS, --placeholders=PLACEHOLDERS
+                            A list of placeholder parameters for the proc.
+        -r REPLACE, --replace=REPLACE
+                            A list of replacements to make in the proc.REP0, REP1,
+                            REP2, REP3 etc... in the sql.
+        -q REPLACE_QUOTE, --replace_quote=REPLACE_QUOTE
+                            Same as replace but the items from the list are quoted
+        -l LIMIT, --limit=LIMIT
+                            A limit to append to the sql as LIMIT integer.
+        -o OFFSET, --offset=OFFSET
+                            An offset to append to the sql as OFFSET integer.
+        -k KEY_COLUMN, --key_column=KEY_COLUMN
+                            table.column to use as a key_column for return_types
+                            of dict* or set*
+        -R RETURN_TYPE, --return_type=RETURN_TYPE
+                            Possible values are dict, dict_json, tuple, tuple_json,
+                            table, table_json, set, and set_json.  Defaults to tuple.
+    
+      Debug Options:
+        -s, --debug_show    Show SQL and other info about the query including
+                            execution time.
+        -n, --debug_noex    Show SQL and other info about the query without
+                            executing it.
 
 Ex: Output from the --debug_show options
 
-MySQL.MySQL debug message:
-   host:localhost db:test host_type:master_host proc:test.get_data
-   Executing SQL:SELECT `id`, `auto_pfamA`, `go_id`, `term`, `category` FROM `test`.`DATA_SOURCES_TEST_DATA`
-   Execution Time:8.0880e-02 sec
-   [
-      {
-         "auto_pfamA": 420,
-         "category": "process",
-         "go_id": "GO:0006807",
-         "id": 1,
-         "term": "nitrogen compound metabolic process"
-      },
-      {
-         "auto_pfamA": 420,
-         "category": "function",
-         "go_id": "GO:0015930",
-         "id": 2,
-         "term": "glutamate synthase activity"
-      },
-
-      etc...
+    MySQL.MySQL debug message:
+       host:localhost db:test host_type:master_host proc:test.get_data
+       Executing SQL:SELECT `id`, `auto_pfamA`, `go_id`, `term`, `category` FROM `test`.`DATA_SOURCES_TEST_DATA`
+       Execution Time:8.0880e-02 sec
+       [
+          {
+             "auto_pfamA": 420,
+             "category": "process",
+             "go_id": "GO:0006807",
+             "id": 1,
+             "term": "nitrogen compound metabolic process"
+          },
+          {
+             "auto_pfamA": 420,
+             "category": "function",
+             "go_id": "GO:0015930",
+             "id": 2,
+             "term": "glutamate synthase activity"
+          },
+    
+          etc...
 
 ----------------------------------
 RDBS Hub Usage
@@ -626,14 +616,14 @@ RDBS Hub Usage
 All RDBS derived hubs possess the following interface.  Derived RDBS hubs
 require a datasource name when instantiated:
 
-hub = RDBSHub(datasource)
-data = hub.execute(proc="my.awesome.proc", return_type="tuple_json")
+    hub = RDBSHub(datasource)
+    data = hub.execute(proc="my.awesome.proc", return_type="tuple_json")
 
 The caller can also provide a cursor to use instead of formulating
 a new connection to the database:
 
-hub = RDBSHub(datasource, cursor=my_cursor)
-data = hub.execute(proc="my.awesome.proc", return_type="tuple_json")
+    hub = RDBSHub(datasource, cursor=my_cursor)
+    data = hub.execute(proc="my.awesome.proc", return_type="tuple_json")
 
 When the cursor keyword argument is provided it is up to the caller
 to manage any explicit cursor closeing operations.  This feature has
@@ -649,75 +639,71 @@ SQL that contain reserved words.  Data can be returned as python
 object, json strings, or iterator's depending on what the caller
 sets the return_type to.
 
------------
-Parameters:
------------
+###Parameters:
 
-   --------------
-   Argument keys:
-   --------------
-   db - Name of database to connect to.  You can set a default
-        in datasources.json and you can also override with explicit
-        database references in your SQL statements.
+####Argument keys:
 
-   proc - Name of the procedure to call.  Optional, if the 'sql' key
-          is provided.
+* ``db`` - Name of database to connect to.  You can set a default
+    in datasources.json and you can also override with explicit
+    database references in your SQL statements.
 
-   sql - Provide raw SQL to execute instead of a procedure name.  Use
-         for rapid prototyping/testing only, one of the main points of
-         RDBS datasources is to keep your SQL out of the application.
+* ``proc`` - Name of the procedure to call.  Optional, if the 'sql' key
+      is provided.
 
-   host_type - Possible values include master_host, read_host, or dev_host.
-               Defaults to master_host.  It can also be set as a default
-               in the procs file.
+* ``sql`` - Provide raw SQL to execute instead of a procedure name.  Use
+     for rapid prototyping/testing only, one of the main points of
+     RDBS datasources is to keep your SQL out of the application.
 
-   placeholders - A list of placeholder parameters for the proc or sql.
-                  Placeholders can be used in conjunction with replace.
+* ``host_type`` - Possible values include master_host, read_host, or dev_host.
+           Defaults to master_host.  It can also be set as a default
+           in the procs file.
 
-   replace - A list of replacements to make in the proc or sql.  Use this when
-             you need to replace table or column names or any other part of SQL
-             that contains reserved words, you cannot use placeholders for that.
-             Replacements are designated by 'REP0', 'REP1', 'REP2', 'REP3' etc...
-             in the sql.  Items in the provided list are used as the replacements
-             specified, the number appended to the 'REP' string should correspond
-             to the associated index in the list provided.  Replace can be used
-             in conjuction with placeholders.
+* ``placeholders`` - A list of placeholder parameters for the proc or sql.
+              Placeholders can be used in conjunction with replace.
 
-   replace_quote - Same as replace but the items from the list are quoted before
-                   the statement is executed.
+* ``replace`` - A list of replacements to make in the proc or sql.  Use this when
+         you need to replace table or column names or any other part of SQL
+         that contains reserved words, you cannot use placeholders for that.
+         Replacements are designated by 'REP0', 'REP1', 'REP2', 'REP3' etc...
+         in the sql.  Items in the provided list are used as the replacements
+         specified, the number appended to the 'REP' string should correspond
+         to the associated index in the list provided.  Replace can be used
+         in conjuction with placeholders.
 
-   executemany - When set to true, placeholders can be a list of lists of parameters
-                 for MySQL-python's executemany function.  This is very useful for
-                 multi-row inserts.
+* ``replace_quote`` - Same as replace but the items from the list are quoted before
+               the statement is executed.
 
-   limit - A limit to append to the sql as LIMIT integer.
+* ``executemany`` - When set to true, placeholders can be a list of lists of parameters
+             for MySQL-python's executemany function.  This is very useful for
+             multi-row inserts.
 
-   offset - An offset to append to the sql as OFFSET integer.
+* ``limit`` - A limit to append to the sql as LIMIT integer.
 
-   ------------
-   Chunking
-   ------------
-   When a query pulls back a quantity of data that exceeds available RAM on
-   either the database or client computer use the chunking options.  These
-   options allow the caller to specify a chunk size of rows to return using
-   an iterator.  The total number of chunks to return is automatically
-   calculated using the chunk_source.  A set of SQL statements are dynamically
-   built, each statement has a WHERE IN (or just an IN if there's already a WHERE)
-   appended to it, the new IN clause has a total item count of chunk_size, and
-   contains a list of chunk_source values.  Not sure how this will work with
-   nested queries so use caution, stil need to test...
+* ``offset`` - An offset to append to the sql as OFFSET integer.
 
-   chunk_size - Chunk size as an integer.  Example: 1000 will yield 1000 rows for every
-                set of data returned.
+####Chunking
 
-   chunk_source - The table and column to use to compute the number of chunks to return.
-                  Use an explicit column name like so: table_name.column_name.
+When a query pulls back a quantity of data that exceeds available RAM on
+either the database or client computer use the chunking options.  These
+options allow the caller to specify a chunk size of rows to return using
+an iterator.  The total number of chunks to return is automatically
+calculated using the chunk_source.  A set of SQL statements are dynamically
+built, each statement has a WHERE IN (or just an IN if there's already a WHERE)
+appended to it, the new IN clause has a total item count of chunk_size, and
+contains a list of chunk_source values.  Not sure how this will work with
+nested queries so use caution, stil need to test...
 
-   chunk_min - A minimum id to start the chunks from.  This defaults to 0.
+* ``chunk_size`` - Chunk size as an integer.  Example: 1000 will yield 1000 rows for every
+            set of data returned.
 
-   chunk_total - A total number of records to return.  This defaults to the max id from chunk_source.
+* ``chunk_source`` - The table and column to use to compute the number of chunks to return.
+              Use an explicit column name like so: table_name.column_name.
 
-   Ex: Using the chunking options
+* ``chunk_min`` - A minimum id to start the chunks from.  This defaults to 0.
+
+* ``chunk_total`` - A total number of records to return.  This defaults to the max id from chunk_source.
+
+Ex: Using the chunking options
 
       ######
       # Table structure:
@@ -754,101 +740,99 @@ Parameters:
          #####
          do_something_awesome(data)
 
-   -------------------
-   Output related keys
-   -------------------
-   return_type - Possible values are 'iter', 'dict', 'dict_json', 'tuple', 'tuple_json',
-                 'table', 'table_json', 'set', 'set_json', and 'callback'.  Return type
-                 selections of 'dict' and 'callback' require additional key/value pairs.
-                 Defaults to 'tuple'.
+####Output related keys
 
-      __________________
-      Return Type Explanations
-      ------------------
-      iter - A DataHub iterator will be returned.  The iterator can be used in list
-             context like any other iter but there are also additional data retrieval
-             functions like get_column_data() which return the value of a single column,
-             great when you're expecting a single value and don't want to iterate.
-
-      dict - A dictionary is returned where the key is set to the column name provided in
-             key_column and the value is a dictionary containing all of the row data.
-             Using this option assumes the data in the key_column is unique otherwise
-             duplicate values will be overwritten in the dictionary returned.  This
-             option REQUIRES that the argument key_column is set.
-
-             { key_column_value1: {{ col1=value1, col2=value1 },
-                                   { col1=value2, col2=value2 },
-                                   { col1=value3, col2=value3 }},
-
-               key_column_value2: {{ col1=value1, col2=value1 },
-                                   { col1=value2, col2=value2 },
-                                   { col1=value3, col2=value3 }}, etc... }
+``return_type`` - Possible values are ``iter``, ``dict``, ``dict_json``, ``tuple``, ``tuple_json``,
+             ``table``, ``table_json``, ``set``, ``set_json``, and ``callback``.  Return type
+             selections of ``dict`` and ``callback`` require additional key/value pairs.
+             Defaults to ``tuple``.
 
 
-      dict_json - Same as dict but a json string.
+####Return Type Explanations
 
-      tuple - When tuple is selected a tuple of dictionaries is returned.
+``iter`` - A DataHub iterator will be returned.  The iterator can be used in list
+     context like any other iter but there are also additional data retrieval
+     functions like get_column_data() which return the value of a single column,
+     great when you're expecting a single value and don't want to iterate.
 
-             ( { col1=value1, col2=value1 },
-               { col1=value2, col2=value2 },
-               { col1=value3, col2=value3} etc...)
+``dict`` - A dictionary is returned where the key is set to the column name provided in
+     key_column and the value is a dictionary containing all of the row data.
+     Using this option assumes the data in the key_column is unique otherwise
+     duplicate values will be overwritten in the dictionary returned.  This
+     option REQUIRES that the argument key_column is set.
 
-      tuple_json - Same as tuple but a json string.
+     { key_column_value1: {{ col1=value1, col2=value1 },
+                           { col1=value2, col2=value2 },
+                           { col1=value3, col2=value3 }},
 
-      table - Returns an ordered list of the column names along with the data.
-              { columns:[colname1, colname2, colname3], data:tuple }
-
-      table_json - Same as table but json string.
-
-      set - A set is returned where each item in the set is derived from the value
-            associated with the column name in key_column.  Use if you just need to
-            do rapid lookups for a set of values.
-
-            set([ key_column_value1,
-                  key_column_value2,
-                  key_column_value3,
-                  key_column_value4, etc... ])
-
-      set_json - There is no concept of a set in json so this is what you get:
-
-            { key_column_value1:None,
-              key_column_value2:None,
-              key_column_value3:None,
-              key_column_value4:None, etc...}
+       key_column_value2: {{ col1=value1, col2=value1 },
+                           { col1=value2, col2=value2 },
+                           { col1=value3, col2=value3 }}, etc... }
 
 
-      callback - When a callback is specified a function reference can be provided to
-                 be used as a callback.  The callback will be called for every row
-                 returned by the database cursor for the statement specified.  This
-                 option REQUIRES that the 'callback' key is set.
+``dict_json`` - Same as dict but a json string.
 
-   key_column - If a return_type of 'dict*' or 'set*' is chosen this key/value
-                must be set to the database column name to be used as the key
-                in the dictionary returned.
+``tuple`` - When tuple is selected a tuple of dictionaries is returned.
 
-   callback - A function reference that will be called for every row returned from
-              the database.  The callback is passed a dictionary where key/values are
-              key='column name' and value='column value'.
+     ( { col1=value1, col2=value1 },
+       { col1=value2, col2=value2 },
+       { col1=value3, col2=value3} etc...)
 
-   -------------------
-   Debug and profile keys
-   -------------------
-   debug_show - Show the SQL queries and execution times.
-   debug_noex - Show the SQL queries that are generated but don't execute them.
+``tuple_json`` - Same as tuple but a json string.
 
-------------------
-Derived RDBS Hubs
-------------------
+``table`` - Returns an ordered list of the column names along with the data.
+      
+    { columns:[colname1, colname2, colname3], data:tuple }
+
+``table_json`` - Same as table but json string.
+
+``set`` - A set is returned where each item in the set is derived from the value
+    associated with the column name in key_column.  Use if you just need to
+    do rapid lookups for a set of values.
+
+    set([ key_column_value1,
+          key_column_value2,
+          key_column_value3,
+          key_column_value4, etc... ])
+
+``set_json`` - There is no concept of a set in json so this is what you get:
+
+    { key_column_value1:None,
+      key_column_value2:None,
+      key_column_value3:None,
+      key_column_value4:None, etc...}
+
+
+``callback`` - When a callback is specified a function reference can be provided to
+         be used as a callback.  The callback will be called for every row
+         returned by the database cursor for the statement specified.  This
+         option REQUIRES that the 'callback' key is set.
+
+``key_column`` - If a return_type of 'dict*' or 'set*' is chosen this key/value
+            must be set to the database column name to be used as the key
+            in the dictionary returned.
+
+``callback`` - A function reference that will be called for every row returned from
+          the database.  The callback is passed a dictionary where key/values are
+          key='column name' and value='column value'.
+
+####Debug and profile keys
+
+``debug_show`` - Show the SQL queries and execution times.
+``debug_noex`` - Show the SQL queries that are generated but don't execute them.
+
+
+####Derived RDBS Hubs
+
 MySQL - This is the only derived hub currently available.  It can be imported
         and used directly like so:
 
         from datasource.hubs.MySQL import MySQL
 
-        Hope to add some more hubs soon! This hub requires the python MySQLdb
-        (http://mysql-python.sourceforge.net/).
+Hope to add some more hubs soon! This hub requires the python MySQLdb
+(http://mysql-python.sourceforge.net/).
 
-------------------
-Returns:
-------------------
-   An iterable object or json string depending on what the caller specified.
+####Returns:
+
+An iterable object or json string depending on what the caller specified.
 
