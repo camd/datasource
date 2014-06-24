@@ -28,29 +28,29 @@ RDBS datasource example
 -----------------------
 Ex: excerpt from data_source.json file use by the unit tests in /datasource/t::
 
-   { "MySQL_test": { "hub":"MySQL",
-                     "master_host": { "host":"localhost",
-                                      "user":"jeads",
-                                      "passwd":"pwd" },
+    { "MySQL_test": { "hub":"MySQL",
+                      "master_host": { "host":"localhost",
+                                       "user":"jeads",
+                                       "passwd":"pwd" },
 
-                     ##Not required if you don't have one##
-                     "read_host": { "host":"localhost",
-                                    "user":"jeads",
-                                    "passwd":"pwd" },
+                      ##Not required if you don't have one##
+                      "read_host": { "host":"localhost",
+                                     "user":"jeads",
+                                     "passwd":"pwd" },
 
-                     ##Not required if you don't have one##
-                     "dev_host": { "host":"localhost",
-                                    "user":"jeads",
-                                    "passwd":"pwd" },
+                      ##Not required if you don't have one##
+                      "dev_host": { "host":"localhost",
+                                     "user":"jeads",
+                                     "passwd":"pwd" },
 
-                     ##Not required##
-                     "default_db": "test",
+                      ##Not required##
+                      "default_db": "test",
 
-                     ##All files must have unique names##
-                     "procs": [ "/any/path/will/do/procs/mysql_procs/sql.json",
-                                "/any/path/will/do/mysql_procs/test.json" ]
+                      ##All files must have unique names##
+                      "procs": [ "/any/path/will/do/procs/mysql_procs/sql.json",
+                                 "/any/path/will/do/mysql_procs/test.json" ]
 
-                  }, etc... any number of datasources }
+                     }, etc... any number of datasources }
 
 
 SQL proc file example
