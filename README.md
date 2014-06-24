@@ -57,7 +57,7 @@ SQL proc file example
 -----------------------
 Ex: excerpt from test.json file used by the unit tests in /datasource/t::
 
-   {
+    {
       "get_data":{
          "sql":"SELECT `id`, `auto_pfamA`, `go_id`, `term`, `category`
                 FROM `test`.`DATA_SOURCES_TEST_DATA`",
@@ -84,7 +84,7 @@ Ex: excerpt from test.json file used by the unit tests in /datasource/t::
          "host_type":"master_host"
 
       }, etc... any number of sql procs
-   }
+    }
 
 Putting it all together
 -----------------------
@@ -97,8 +97,10 @@ Note:
     see the RDBSHub.execute() docs for a full description of
     the interface.
 
+
 EXAMPLE 1:
 ~~~~~~~~~~
+
 Get some data using the DataHub, use when you have multiple datasources::
 
     from datasource.DataHub import DataHub
@@ -124,8 +126,10 @@ Get some data using the DataHub, use when you have multiple datasources::
         'go_id':'GO:0015930'},
     etc...]
 
+
 EXAMPLE 2:
 ~~~~~~~~~~
+
 Get some data using a specific data hub, use when you just need one hub::
 
       from datasource.hubs.MySQL import MySQL
@@ -134,8 +138,10 @@ Get some data using a specific data hub, use when you just need one hub::
       data = dh.execute(proc="test.get_data",
                         return_type="tuple_json")
 
+
 EXAMPLE 3:
 ~~~~~~~~~~~
+
 Get some data with placeholders in SQL::
 
       ####
@@ -145,8 +151,10 @@ Get some data with placeholders in SQL::
                         placeholders=[1,2,3,4],
                         return_type="tuple_json")
 
+
 EXAMPLE 4:
 ~~~~~~~~~~~
+
 Get some data with placeholders in SQL, retrieve data as a hash of hashes::
 
       data = dh.execute(proc="test.get_data_set",
