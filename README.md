@@ -245,23 +245,23 @@ Get Started In A Blind Animal Rage Filled Fury!
 3. In your module/script do something like so:
 
 
-    from datasource.DataHub import DataHub
-    dh = DataHub("mydatasourcename")
-
-    #Get me some data
-    data = dh.execute(proc="my.super.duper.proc",
-                      return_type="tuple")
-
-    #Data looks like this
-    ( {'column_name1':value,
-       'column_name2':value,
-       'column_name3':value },
-
-       {'column_name1':value,
-        'column_name2':value,
-        'column_name3':value },
-    etc...)
-
+        from datasource.DataHub import DataHub
+        dh = DataHub("mydatasourcename")
+    
+        #Get me some data
+        data = dh.execute(proc="my.super.duper.proc",
+                          return_type="tuple")
+    
+        #Data looks like this
+        ( {'column_name1':value,
+           'column_name2':value,
+           'column_name3':value },
+    
+           {'column_name1':value,
+            'column_name2':value,
+            'column_name3':value },
+        etc...)
+    
 
 ###RAWRRR! That was fast###
 
