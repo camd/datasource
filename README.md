@@ -242,7 +242,8 @@ Get Started In A Blind Animal Rage Filled Fury!
 2. Build a procs file and reference it in the datasources file.
    See the "Procs file" section for details.
 
-3. In your module/script do something like so::
+3. In your module/script do something like so:
+
 
     from datasource.DataHub import DataHub
     dh = DataHub("mydatasourcename")
