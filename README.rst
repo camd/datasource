@@ -1,31 +1,34 @@
 ----------------------------------
 Overview
 ----------------------------------
-   The purpose of datasource is to encapsulate any source of data  and
-provide a clean interface to it that doesn't make your application look
-like a briar patch.  It comes in handy when you have a single application
-that has to work with multiple disparate datasources or if you just need to
-encapsulate a lot of data methods from a single data source.
-   There are two core concepts: the datasource and the data hub.  Datasources
-refer to the source of data, could be an RDBS, set of flatfiles, a
-webservice etc...  Different types of datasources have different types of
-derived data hubs.  So an RDBS may have a MySQL hub or an Oracle hub, a
-webservice may have an HTTP or SOAP hub, a custom flatfile database may have a
-custom data hub.
-    Datasources can have an unlimited number of procedures or procs associated
-with them.  Procs are stored in json files.  This is a way to keep
-raw SQL, URLs, or filesystem paths to data and associated operations
-out of your application layer.
-   Works great when you have to scale an RDBS horizontally and cannot use an
-ORM effectively or if you need to do this for dozens of RDBS databases in a
-single application.
-   The only hub currently implemented is for MySQL, so all the examples
-use that hub.  Will change if new hubs get added.
+The purpose of datasource is to encapsulate any source of data  and provide a
+clean interface to it that doesn't make your application look like a briar
+patch.  It comes in handy when you have a single application that has to work
+with multiple disparate datasources or if you just need to encapsulate a lot
+of data methods from a single data source.
 
-   -----------------------
-   RDBS datasource example
-   -----------------------
-   Ex: excerpt from data_source.json file use by the unit tests in /datasource/t
+There are two core concepts: the datasource and the data hub.  Datasources
+refer to the source of data, could be an RDBS, set of flatfiles, a webservice
+etc...  Different types of datasources have different types of derived data
+hubs.  So an RDBS may have a MySQL hub or an Oracle hub, a webservice may have
+an HTTP or SOAP hub, a custom flatfile database may have a custom data hub.
+
+Datasources can have an unlimited number of procedures or procs associated
+with them.  Procs are stored in json files.  This is a way to keep raw SQL,
+ URLs, or filesystem paths to data and associated operations out of your
+ application layer.
+
+Works great when you have to scale an RDBS horizontally and cannot use an
+ORM effectively or if you need to do this for dozens of RDBS databases in
+a single application.
+
+The only hub currently implemented is for MySQL, so all the examples use
+that hub.  Will change if new hubs get added.
+
+RDBS datasource example
+-----------------------
+Ex: excerpt from data_source.json file use by the unit tests in /datasource/t::
+
    { "MySQL_test": { "hub":"MySQL",
                      "master_host": { "host":"localhost",
                                       "user":"jeads",
@@ -50,10 +53,11 @@ use that hub.  Will change if new hubs get added.
 
                   }, etc... any number of datasources }
 
-   -----------------------
-   SQL proc file example
-   -----------------------
-   Ex: excerpt from test.json file used by the unit tests in /datasource/t
+
+SQL proc file example
+-----------------------
+Ex: excerpt from test.json file used by the unit tests in /datasource/t::
+
    {
       "get_data":{
          "sql":"SELECT `id`, `auto_pfamA`, `go_id`, `term`, `category`
@@ -83,41 +87,47 @@ use that hub.  Will change if new hubs get added.
       }, etc... any number of sql procs
    }
 
-   ------------------------
-   Putting it all together
+Putting it all together
+-----------------------
 
-   Note: All of these examples are using the MySQL hub because
-         that's the only hub implemented.  The guts of the
-         interface are the options available to RDBSHub.execute(),
-         see the RDBSHub.execute() docs for a full description of
-         the interface.
-   ------------------------
-   EXAMPLE 1: Get some data using the DataHub, use when you have multiple datasources
+Note:
 
-      from datasource.DataHub import DataHub
+    All of these examples are using the MySQL hub because
+    that's the only hub implemented.  The guts of the
+    interface are the options available to RDBSHub.execute(),
+    see the RDBSHub.execute() docs for a full description of
+    the interface.
 
-      dh = DataHub.get("MySQL_test")
-      data = dh.execute(proc="test.get_data", # file_name.proc_name
-                        return_type="tuple_json")
+EXAMPLE 1:
+~~~~~~~~~~
+Get some data using the DataHub, use when you have multiple datasources::
 
-      ####
-      #data is an array of hashes in a JSON string #all data can also be
-      #returned as python objects see the execute() parameter list
-      ####
-      [ {'category':'process',
-         'term':'nitrogen compound metabolic process',
-         'auto_pfamA':420,
-         'id':1,
-         'go_id':'GO:0006807'},
+    from datasource.DataHub import DataHub
 
-         {'category':'function',
-          'term':'glutamate synthase activity',
-          'auto_pfamA': 420,
-          'id': 2,
-          'go_id':'GO:0015930'},
-      etc...]
+    dh = DataHub.get("MySQL_test")
+    data = dh.execute(proc="test.get_data", # file_name.proc_name
+                      return_type="tuple_json")
 
-   EXAMPLE 2: Get some data using a specific data hub, use when you just need one hub
+    ####
+    #data is an array of hashes in a JSON string #all data can also be
+    #returned as python objects see the execute() parameter list
+    ####
+    [ {'category':'process',
+       'term':'nitrogen compound metabolic process',
+       'auto_pfamA':420,
+       'id':1,
+       'go_id':'GO:0006807'},
+
+       {'category':'function',
+        'term':'glutamate synthase activity',
+        'auto_pfamA': 420,
+        'id': 2,
+        'go_id':'GO:0015930'},
+    etc...]
+
+EXAMPLE 2:
+~~~~~~~~~~
+Get some data using a specific data hub, use when you just need one hub::
 
       from datasource.hubs.MySQL import MySQL
 
@@ -125,7 +135,9 @@ use that hub.  Will change if new hubs get added.
       data = dh.execute(proc="test.get_data",
                         return_type="tuple_json")
 
-   EXAMPLE 3: Get some data with placeholders in SQL
+EXAMPLE 3:
+~~~~~~~~~~~
+Get some data with placeholders in SQL::
 
       ####
       #See the SQL above in the get_data_set proc
@@ -134,7 +146,9 @@ use that hub.  Will change if new hubs get added.
                         placeholders=[1,2,3,4],
                         return_type="tuple_json")
 
-   EXAMPLE 4: Get some data with placeholders in SQL, retrieve data as a hash of hashes
+EXAMPLE 4:
+~~~~~~~~~~~
+Get some data with placeholders in SQL, retrieve data as a hash of hashes::
 
       data = dh.execute(proc="test.get_data_set",
                         placeholders=[1,2,3,4],
@@ -157,8 +171,9 @@ use that hub.  Will change if new hubs get added.
                       "id": 89,
                       "auto_pfamA": 4422}, etc...}
 
-   EXAMPLE 5: You need to dynamically replace table and column names use the
-               "replace" option to execute.
+EXAMPLE 5:
+~~~~~~~~~~
+You need to dynamically replace table and column names use the ``replace`` option to execute::
 
       ####
       # Ex: From a proc file
@@ -187,8 +202,9 @@ use that hub.  Will change if new hubs get added.
       #            FROM `test`.`DATA_SOURCES_TEST_DATA`",
       ####
 
-   EXAMPLE 6: You have a bunch of string ids that you you need to add to
-              a WHERE IN clause.  Use the "replace_quote" option.
+EXAMPLE 6:
+~~~~~~~~~~
+You have a bunch of string ids that you you need to add to a ``WHERE IN`` clause.  Use the "replace_quote" option::
 
       ####
       #  Ex: From a proc file
@@ -212,11 +228,10 @@ use that hub.  Will change if new hubs get added.
                         replace_quote=[ids],
                         return_type="tuple_json")
 
----------------------------------------
-Get Started In A Blind Animal Rage Filled Fury!
 
-...ABARFF for short
+Get Started In A Blind Animal Rage Filled Fury!
 ---------------------------------------
+...ABARFF for short
 
    1.) Build a datasources file.  See the "Datasources file" section
        for details or add a data source at run time see Install Notes.
