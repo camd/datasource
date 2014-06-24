@@ -98,8 +98,7 @@ Note:
     the interface.
 
 
-EXAMPLE 1:
-~~~~~~~~~~
+###EXAMPLE 1:
 
 Get some data using the DataHub, use when you have multiple datasources::
 
@@ -127,8 +126,7 @@ Get some data using the DataHub, use when you have multiple datasources::
     etc...]
 
 
-EXAMPLE 2:
-~~~~~~~~~~
+###EXAMPLE 2:
 
 Get some data using a specific data hub, use when you just need one hub::
 
@@ -139,8 +137,7 @@ Get some data using a specific data hub, use when you just need one hub::
                         return_type="tuple_json")
 
 
-EXAMPLE 3:
-~~~~~~~~~~~
+###EXAMPLE 3:
 
 Get some data with placeholders in SQL::
 
@@ -152,8 +149,7 @@ Get some data with placeholders in SQL::
                         return_type="tuple_json")
 
 
-EXAMPLE 4:
-~~~~~~~~~~~
+###EXAMPLE 4:
 
 Get some data with placeholders in SQL, retrieve data as a hash of hashes::
 
@@ -178,8 +174,8 @@ Get some data with placeholders in SQL, retrieve data as a hash of hashes::
                       "id": 89,
                       "auto_pfamA": 4422}, etc...}
 
-EXAMPLE 5:
-~~~~~~~~~~
+###EXAMPLE 5:
+
 You need to dynamically replace table and column names use the ``replace`` option to execute::
 
       ####
@@ -209,8 +205,8 @@ You need to dynamically replace table and column names use the ``replace`` optio
       #            FROM `test`.`DATA_SOURCES_TEST_DATA`",
       ####
 
-EXAMPLE 6:
-~~~~~~~~~~
+###EXAMPLE 6:
+
 You have a bunch of string ids that you you need to add to a ``WHERE IN`` clause.  Use the "replace_quote" option::
 
       ####
@@ -240,32 +236,34 @@ Get Started In A Blind Animal Rage Filled Fury!
 ---------------------------------------
 ...ABARFF for short
 
-   1.) Build a datasources file.  See the "Datasources file" section
-       for details or add a data source at run time see Install Notes.
+1. Build a datasources file.  See the "Datasources file" section
+   for details or add a data source at run time see Install Notes.
 
-   2.) Build a procs file and reference it in the datasources file.
-       See the "Procs file" section for details.
+2. Build a procs file and reference it in the datasources file.
+   See the "Procs file" section for details.
 
-   3.) In your module/script do something like so:
+3. In your module/script do something like so:
 
-   from datasource.DataHub import DataHub
-   dh = DataHub("mydatasourcename")
 
-   ##Get me some data##
-   data = dh.execute(proc="my.super.duper.proc",
-                     return_type="tuple")
+    from datasource.DataHub import DataHub
+    dh = DataHub("mydatasourcename")
 
-   ##Data looks like this##
-   ( {'column_name1':value,
-      'column_name2':value,
-      'column_name3':value },
+    ##Get me some data##
+    data = dh.execute(proc="my.super.duper.proc",
+                      return_type="tuple")
 
-      {'column_name1':value,
+    ##Data looks like this##
+    ( {'column_name1':value,
        'column_name2':value,
        'column_name3':value },
-   etc...)
 
-   ##RAWRRR! That was fast##
+       {'column_name1':value,
+        'column_name2':value,
+        'column_name3':value },
+    etc...)
+
+
+###RAWRRR! That was fast###
 
 ------------------
 datasource repository structure
