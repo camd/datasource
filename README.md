@@ -242,8 +242,7 @@ Get Started In A Blind Animal Rage Filled Fury!
 2. Build a procs file and reference it in the datasources file.
    See the "Procs file" section for details.
 
-3. In your module/script do something like so:
-
+3. In your module/script do something like so::
 
     from datasource.DataHub import DataHub
     dh = DataHub("mydatasourcename")
@@ -268,63 +267,63 @@ Get Started In A Blind Animal Rage Filled Fury!
 ------------------
 datasource repository structure
 ------------------
-DataHub.py
+``DataHub.py``
    - This class will automatically import whatever derived hub class
      is required by the datasource.  It also provides a command line
      interface for testing procs and their associated output.
 
-/datasource/bases
+``/datasource/bases``
    - Directory for all base classes.  Base classes for new data hubs
      should be placed in this directory.
 
-   BaseHub.py
-      - All data hubs inherit from the BaseHub.  This module provides all
-        of the facilities for loading/parsing the datasource file.
+    ``BaseHub.py``
+          - All data hubs inherit from the BaseHub.  This module provides all
+            of the facilities for loading/parsing the datasource file.
 
-   RDBSHub.py
-      - Base class for all derived RDBS hubs inherits from BaseHub.
+    ``RDBSHub.py``
+          - Base class for all derived RDBS hubs inherits from BaseHub.
 
-/datasource/hubs
+``/datasource/hubs``
 
-   MySQL.py
+   ``MySQL.py``
       - Data hub for MySQL databases.  Inherits from RDBSHub.
 
-/datasource/procs
-   /mysql_procs/
+``/datasource/procs``
+   ``/mysql_procs/``
       sql.json - General SQL for applications
       test.json - SQL for unit tests
 
-/datasource/t
+``/datasource/t``
 
-   Unit tests for RDBS hubs require a database called `test`.  The tests create a
-   table called `DATA_SOURCES_TEST_DATA` and load /datasource/t/test_data.txt
-   into it.
+Unit tests for RDBS hubs require a database called `test`.  The tests create a
+table called `DATA_SOURCES_TEST_DATA` and load /datasource/t/test_data.txt
+into it.
 
-   TestMySQLHub.py
+    TestMySQLHub.py
       - Unit tests for MySQLHub.py
 
-   TestDataHub.py
+    TestDataHub.py
       - Unit tests for DataHub.py
 
-   test_data.txt
+    test_data.txt
       - Test data for all of the unit tests. This 479K file
         contains tab delimited data.
 
 ----------------------------------
 Install Notes
 ----------------------------------
-1.) If you want to run the unit tests in datasource/t
+1. If you want to run the unit tests in datasource/t
     edit datasource/data_sources.json to point to your
     test database.  If you don't want to run unit tests
     then you don't need to do this.
 
-2.) python setup.py install
+2. python setup.py install
 
 BaseHub in datasource.bases needs to know where the
 datasource json file is.  There are a few options of how
 to set that up.
 
-1.) Set the DATASOURCES Environment Variable
+1. Set the DATASOURCES Environment Variable
 
    #for bash
    DATASOURCES=/path/to/my/datasources.json
@@ -333,52 +332,58 @@ to set that up.
    You can name the file whatever you want but you need
    the '.json' extension
 
-2.) You can add datasources at run time like this.
+2. You can add datasources at run time like this::
 
-   from datasource.bases.BaseHub import BaseHub
 
-   data_source = { DATASOURCE_NAME : { "hub":"MySQL",
-                                      "master_host":{"host":HOST,
-                                                    "user":USER,
-                                                    "passwd":PASSWORD},
-                                     "default_db":DATABASE,
-                                     "procs": ["/path/to/procs/myprocs.json")]
-                                    }
-   }
+    from datasource.bases.BaseHub import BaseHub
 
-   BaseHub.add_data_source(data_source)
+    data_source = { DATASOURCE_NAME : { "hub":"MySQL",
+                                       "master_host":{"host":HOST,
+                                                     "user":USER,
+                                                     "passwd":PASSWORD},
+                                      "default_db":DATABASE,
+                                      "procs": ["/path/to/procs/myprocs.json")]
+                                     }
+    }
 
-   The structure of data_source should be the
-   same as the datasources file.
+    BaseHub.add_data_source(data_source)
 
-3.) There is a data_source.json file in the datasource directory.
-    This is used for unit tests.  It runs tests on a database named
-    'test' on localhost.  Feel free to edit the host info if you
-    want to run unit tests.  You can add sources to it but be aware
-    any changes made to this file could be clobbered in the future.
+
+    The structure of data_source should be the
+    same as the datasources file.
+
+3. There is a data_source.json file in the datasource directory.
+   This is used for unit tests.  It runs tests on a database named
+   'test' on localhost.  Feel free to edit the host info if you
+   want to run unit tests.  You can add sources to it but be aware
+   any changes made to this file could be clobbered in the future.
+
 
 ----------------------------------
+
 Datasources file
-----------------------------------
-   The data_source.json file contains all of the datasources you
+================
+
+The data_source.json file contains all of the datasources you
 intend to use.  Python style comments, # single line and """ for multi
 line, can be embedded in the file, they are stripped out by BaseHub.py
 before the json is parsed.
-   The structure is a hash of hashes:
 
-      { datasource_name: { "hub":"Module name for the datasource hub",
-                           "procs": [ "/path/to/proc/file.json",
-                                      "/path/to/another/proc/file.json" etc.. ] },
+The structure is a hash of hashes:
 
-         etc...
-      }
+    { datasource_name: { "hub":"Module name for the datasource hub",
+                         "procs": [ "/path/to/proc/file.json",
+                                    "/path/to/another/proc/file.json" etc.. ] },
+
+      etc...
+    }
+
 
 All other key value pairs are specific to various data hubs.
 
-   -----------------------------------
-   RDBS - datasource file description:
-   -----------------------------------
-   This is an excerpt of a datasource file that is used by the unit tests.
+RDBS - datasource file description:
+-----------------------------------
+This is an excerpt of a datasource file that is used by the unit tests.
 
    { "MySQL_test": { "hub":"MySQL",
                      "master_host": { "host":"localhost",
@@ -404,11 +409,10 @@ All other key value pairs are specific to various data hubs.
 
                   }, etc... any number of datasources }
 
-   ------------------
-   Option definitions
-   ------------------
+Option definitions
+------------------
 
-   Required keys:
+Required keys:
 
       master_host - Required if not passing in a cursor, this specifies the master
                     host to connect to.  It must be provided with a hash containing
@@ -432,48 +436,51 @@ All other key value pairs are specific to various data hubs.
       default_db - Optional, specifies a default database name to execute queries
                    against.
 
-----------------------------------
+
 Procs file
-----------------------------------
-   Like the datasource file, the procs file can have python style comments.
+-------------
+
+Like the datasource file, the procs file can have python style comments.
 As the procs get more complex comments can really help document what parameters
 to pass.  This file can have as many nested keys as you want:
 
 Ex: proc file called myprocs.json
 
-{
-   "key1":{
-         key2:{
-               ###
-               #Could be a namespace for a class of
-               #procs
-               ###
-               key3:{
-                     """
-                     This a proc it takes some parameters
-                     """
-                     proc:{}
-               }
-         }
-   }
-}
 
-   All of the outer key names "key1", "key2", "key3", and "proc" are
+    {
+       "key1":{
+             key2:{
+                   ###
+                   #Could be a namespace for a class of
+                   #procs
+                   ###
+                   key3:{
+                         """
+                         This a proc it takes some parameters
+                         """
+                         proc:{}
+                   }
+             }
+       }
+    }
+
+All of the outer key names "key1", "key2", "key3", and "proc" are
 arbitrary.  Use whatever naming convention you want.  However, keep in mind,
 to access a proc with execute you have to provide the full dot delimited proc path
 starting with the file name.
 
 Ex: Accessing proc in execute
 
-   data = dh.execute(proc="myprocs.key1.key2.key3.proc",
-                     return_type="tuple_json")
+    data = dh.execute(proc="myprocs.key1.key2.key3.proc",
+                      return_type="tuple_json")
 
-   -------------------------------
-   RDBS procs file
-   -------------------------------
-   NOTE: Proc files with the name sql.json are assumed to be general SQL that
-         all datasources can share.  Any other file name will be directly associated
-         with your datasource.
+
+RDBS procs file
+---------------
+
+NOTE: Proc files with the name sql.json are assumed to be general SQL that
+     all datasources can share.  Any other file name will be directly associated
+     with your datasource.
 
    Required keys:
 
