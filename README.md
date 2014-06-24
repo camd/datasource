@@ -547,68 +547,68 @@ related info.
 
 This interface looks like this:
 
-    Usage: DataHub.py [OPTIONS]...[datasource]
-    
-    Provides a command line interface to the datasource hub's
-    execute function. For more extensive docs see the README in datasource.
-    
-    Options:
-      -h, --help            show this help message and exit
-      -d DB, --db=DB        Name of database to connect to. Optional, if set in
-                            datasource.
-      -p PROC, --proc=PROC  Name of the procedure to call.
-      -H HOST_TYPE, --host_type=HOST_TYPE
-                            Possible values include master_host, read_host, or
-                            dev_host.  Defaults to master_host.
-    
-      Proc Options:
-        -P PLACEHOLDERS, --placeholders=PLACEHOLDERS
-                            A list of placeholder parameters for the proc.
-        -r REPLACE, --replace=REPLACE
-                            A list of replacements to make in the proc.REP0, REP1,
-                            REP2, REP3 etc... in the sql.
-        -q REPLACE_QUOTE, --replace_quote=REPLACE_QUOTE
-                            Same as replace but the items from the list are quoted
-        -l LIMIT, --limit=LIMIT
-                            A limit to append to the sql as LIMIT integer.
-        -o OFFSET, --offset=OFFSET
-                            An offset to append to the sql as OFFSET integer.
-        -k KEY_COLUMN, --key_column=KEY_COLUMN
-                            table.column to use as a key_column for return_types
-                            of dict* or set*
-        -R RETURN_TYPE, --return_type=RETURN_TYPE
-                            Possible values are dict, dict_json, tuple, tuple_json,
-                            table, table_json, set, and set_json.  Defaults to tuple.
-    
-      Debug Options:
-        -s, --debug_show    Show SQL and other info about the query including
-                            execution time.
-        -n, --debug_noex    Show SQL and other info about the query without
-                            executing it.
+        Usage: DataHub.py [OPTIONS]...[datasource]
+        
+        Provides a command line interface to the datasource hub's
+        execute function. For more extensive docs see the README in datasource.
+        
+        Options:
+          -h, --help            show this help message and exit
+          -d DB, --db=DB        Name of database to connect to. Optional, if set in
+                                datasource.
+          -p PROC, --proc=PROC  Name of the procedure to call.
+          -H HOST_TYPE, --host_type=HOST_TYPE
+                                Possible values include master_host, read_host, or
+                                dev_host.  Defaults to master_host.
+        
+          Proc Options:
+            -P PLACEHOLDERS, --placeholders=PLACEHOLDERS
+                                A list of placeholder parameters for the proc.
+            -r REPLACE, --replace=REPLACE
+                                A list of replacements to make in the proc.REP0, REP1,
+                                REP2, REP3 etc... in the sql.
+            -q REPLACE_QUOTE, --replace_quote=REPLACE_QUOTE
+                                Same as replace but the items from the list are quoted
+            -l LIMIT, --limit=LIMIT
+                                A limit to append to the sql as LIMIT integer.
+            -o OFFSET, --offset=OFFSET
+                                An offset to append to the sql as OFFSET integer.
+            -k KEY_COLUMN, --key_column=KEY_COLUMN
+                                table.column to use as a key_column for return_types
+                                of dict* or set*
+            -R RETURN_TYPE, --return_type=RETURN_TYPE
+                                Possible values are dict, dict_json, tuple, tuple_json,
+                                table, table_json, set, and set_json.  Defaults to tuple.
+        
+          Debug Options:
+            -s, --debug_show    Show SQL and other info about the query including
+                                execution time.
+            -n, --debug_noex    Show SQL and other info about the query without
+                                executing it.
 
 Ex: Output from the --debug_show options
 
-    MySQL.MySQL debug message:
-       host:localhost db:test host_type:master_host proc:test.get_data
-       Executing SQL:SELECT `id`, `auto_pfamA`, `go_id`, `term`, `category` FROM `test`.`DATA_SOURCES_TEST_DATA`
-       Execution Time:8.0880e-02 sec
-       [
-          {
-             "auto_pfamA": 420,
-             "category": "process",
-             "go_id": "GO:0006807",
-             "id": 1,
-             "term": "nitrogen compound metabolic process"
-          },
-          {
-             "auto_pfamA": 420,
-             "category": "function",
-             "go_id": "GO:0015930",
-             "id": 2,
-             "term": "glutamate synthase activity"
-          },
-    
-          etc...
+        MySQL.MySQL debug message:
+           host:localhost db:test host_type:master_host proc:test.get_data
+           Executing SQL:SELECT `id`, `auto_pfamA`, `go_id`, `term`, `category` FROM `test`.`DATA_SOURCES_TEST_DATA`
+           Execution Time:8.0880e-02 sec
+           [
+              {
+                 "auto_pfamA": 420,
+                 "category": "process",
+                 "go_id": "GO:0006807",
+                 "id": 1,
+                 "term": "nitrogen compound metabolic process"
+              },
+              {
+                 "auto_pfamA": 420,
+                 "category": "function",
+                 "go_id": "GO:0015930",
+                 "id": 2,
+                 "term": "glutamate synthase activity"
+              },
+        
+              etc...
 
 ----------------------------------
 RDBS Hub Usage
